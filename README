@@ -1,0 +1,3 @@
+Use conda for python 3.11 environment
+
+Also need a token from hugging face for some models. Use huggingface-cli login to add it
