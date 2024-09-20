@@ -1,0 +1,4 @@
+include: _crows_pairs_mc.yaml
+task: crows_pairs_mc_physical_appearance
+task_alias: physical_appearance
+process_docs: !function utils.filter_appearance

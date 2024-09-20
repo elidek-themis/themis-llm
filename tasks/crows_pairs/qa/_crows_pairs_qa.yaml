@@ -1,0 +1,19 @@
+tag:
+  - multiple-choice-generation
+task: test
+dataset_path: nyu-mll/crows_pairs
+test_split: test
+output_type: generate_until
+doc_to_text: !function utils.doc_to_text
+process_results: !function utils.process_results
+doc_to_target: "1"
+filter_list:
+  - name: "consolidate-answer"
+    filter:
+      - function: "map"
+        mapping_dict: {"1": "1", "2": "2"}
+        default_value: "-1"
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true

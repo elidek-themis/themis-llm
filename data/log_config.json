@@ -1,0 +1,44 @@
+{
+    "formatters": {
+      "default_formatter": {
+        "format": "[Themis] %(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s",
+        "datefmt": "%m-%d %H:%M:%S"
+      },
+      "vllm": {
+        "format": "[vLLM] %(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s",
+        "datefmt": "%m-%d %H:%M:%S"
+      }
+    },
+    "handlers": {
+      "console": {
+        "formatter": "default_formatter",
+        "class" : "logging.StreamHandler",
+        "level": "INFO",
+        "stream": "ext://sys.stdout"
+      },
+      "vllm_console": {
+        "formatter": "vllm",
+        "class" : "logging.StreamHandler",
+        "level": "INFO",
+        "stream": "ext://sys.stdout"
+      }
+    },
+    "loggers": {
+      "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+        "propagate": false
+      },
+      "themis": {
+        "handlers": ["console"],
+        "level": "INFO",
+        "propagate": false
+      },
+      "vllm": {
+        "handlers": ["vllm_console"],
+        "level": "INFO",
+        "propagate": false
+      }
+    },
+    "version": 1
+}

@@ -1,0 +1,4 @@
+include: _crows_pairs_mc.yaml
+task: crows_pairs_mc_socioeconomic
+task_alias: socioeconomic
+process_docs: !function utils.filter_socio

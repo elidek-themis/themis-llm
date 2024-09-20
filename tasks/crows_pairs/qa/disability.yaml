@@ -1,0 +1,4 @@
+include: _crows_pairs_qa.yaml
+task: crows_pairs_qa_disability
+task_alias: disability
+process_docs: !function utils.filter_disability

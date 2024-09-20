@@ -1,0 +1,11 @@
+model: meta-llama/Meta-Llama-3.1-8B-Instruct
+interface: vllm
+task: crows_pairs_qa
+model_args:
+  temperature: 0
+  top_p: 0.95
+  top_k: 10
+  max_tokens: 128
+  seed: 2024
+eval_args:
+  limit: null

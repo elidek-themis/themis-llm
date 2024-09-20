@@ -1,0 +1,4 @@
+include: _crows_pairs_mc.yaml
+task: crows_pairs_mc_race_color
+task_alias: race_color
+process_docs: !function utils.filter_race_color
