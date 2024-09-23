@@ -18,7 +18,7 @@ class Evaluation:
 
     def __init__(self, cfg: Config) -> None:
         self.model = get_model(cfg=cfg)
-        self.task_manager = TaskManager(include_path=TASK_PATH)
+        self.params = {TaskManager(include_path=TASK_PATH)}
 
         # Random seeds
         self.random_seed = cfg.seed
@@ -32,7 +32,6 @@ class Evaluation:
 class CrowsPairsMC(Evaluation):
     def __init__(self, cfg: Config) -> None:
         super().__init__(cfg=cfg)
-
         self.tasks = [
             "crows_pairs_mc_age",
             "crows_pairs_mc_disability",
@@ -92,6 +91,7 @@ def evaluate(cfg: Config) -> None:
 def make_experiment(cfg: Config) -> None:
     experiment = experiment_exists(cfg=cfg)
     if experiment:
-        logger.info("Experiment already run for given configuration")
+        logger.info(f"Experiment already run for given configuration\n{cfg}")
+        # logger.info(cfg)
     else:
         evaluate(cfg=cfg)

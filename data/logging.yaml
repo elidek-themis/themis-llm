@@ -1,0 +1,38 @@
+version: 1
+disable_existing_loggers: False
+
+formatters:
+  default_formatter:
+    format: "[Themis] %(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
+    datefmt: "%m-%d %H:%M:%S"
+  vllm:
+    format: "[vLLM] %(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
+    datefmt: "%m-%d %H:%M:%S"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: default_formatter
+    stream: ext://sys.stdout
+    filters: [ ]
+  vllm_console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: vllm
+    stream: ext://sys.stdout
+    filters: [ ]
+  
+loggers:
+  root:
+    level: INFO
+    handlers: [ console ]
+  themis:
+    level: INFO
+    handlers: [ console ]
+    propagate: no
+  vllm:
+    level: INFO
+    handlers: [ vllm_console ]
+    propagate: no
+

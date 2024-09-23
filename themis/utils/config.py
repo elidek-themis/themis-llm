@@ -1,13 +1,6 @@
-"""
-.env files are generally used to store information related to the particular deployment environment,
-while config files might be used to store data particular to the application as a whole.
-"""
-
-import json
-import logging
 import pprint
 
-import yaml
+from themis.utils.tools import load_yaml_config
 
 
 # https://www.hackerearth.com/practice/notes/samarthbhargav/a-design-pattern-for-configuration-management-in-python/
@@ -35,14 +28,5 @@ class Config:
 
 
 def load_config(config_path: str) -> Config:
-    with open(config_path, "r") as stream:
-        config = yaml.load(stream, Loader=yaml.FullLoader)
-
-    config = Config(**config)
-
-    return config
-
-
-def load_log_config(config_path: str) -> None:
-    with open(config_path) as config:
-        logging.config.dictConfig(json.load(config))
+    config = load_yaml_config(config_path=config_path)
+    return Config(**config)
