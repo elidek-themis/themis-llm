@@ -19,5 +19,3 @@ EXPERIMENTS_PATH = osp.join(LOGS_PATH, "experiments")
 # Configs
 CONFIG_PATH = osp.join(DATA_PATH, "config.yaml")
 LOG_CONFIG_PATH = osp.join(DATA_PATH, "logging.yaml")
-
-

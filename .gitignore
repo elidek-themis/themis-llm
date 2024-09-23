@@ -4,7 +4,12 @@ __pycache__/
 *$py.class
 
 data/logs/experiments
+data/raw
+data/processed
+
 wandb/
+data-exploration.ipynb
+prototyping.ipynb
 
 # C extensions
 *.so
