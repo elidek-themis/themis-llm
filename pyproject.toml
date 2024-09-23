@@ -19,6 +19,7 @@ langchain-community = "^0.2.7"
 lm-eval = "^0.4.4"
 python-json-logger = "^2.0.7"
 click = "^8.1.7"
+coolname = "^2.2.0"
 
 
 [tool.poetry.group.dev.dependencies]

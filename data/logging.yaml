@@ -8,6 +8,9 @@ formatters:
   vllm:
     format: "[vLLM] %(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
     datefmt: "%m-%d %H:%M:%S"
+  lm_eval:
+    format: "[lm-eval] %(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
+    datefmt: "%m-%d %H:%M:%S"
 
 handlers:
   console:
@@ -22,7 +25,13 @@ handlers:
     formatter: vllm
     stream: ext://sys.stdout
     filters: [ ]
-  
+  lm_eval_console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: lm_eval
+    stream: ext://sys.stdout
+    filters: [ ]
+
 loggers:
   root:
     level: INFO
@@ -35,4 +44,7 @@ loggers:
     level: INFO
     handlers: [ vllm_console ]
     propagate: no
-
+  lm-eval:
+    level: WARNING
+    handlers: [ lm_eval_console ]
+    propagate: no

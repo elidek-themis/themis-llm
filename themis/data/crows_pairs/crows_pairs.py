@@ -1,4 +1,3 @@
-# coding=utf-8
 # Copyright 2020 The HuggingFace Datasets Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,6 @@
 
 import datasets
 import pandas as pd
-
 
 _CITATION = """\
 @inproceedings{nangia2020crows,
@@ -38,8 +36,10 @@ CrowS-Pairs, a challenge dataset for measuring the degree to which U.S. stereoty
 """
 
 
-_URLS = [ "https://raw.githubusercontent.com/nyu-mll/crows-pairs/master/data/crows_pairs_anonymized.csv",
-         "https://raw.githubusercontent.com/nyu-mll/crows-pairs/refs/heads/master/data/prompts.csv"]
+_URLS = [
+    "https://raw.githubusercontent.com/nyu-mll/crows-pairs/master/data/crows_pairs_anonymized.csv",
+    "https://raw.githubusercontent.com/nyu-mll/crows-pairs/refs/heads/master/data/prompts.csv",
+]
 
 _BIAS_TYPES = [
     "race-color",
@@ -54,7 +54,6 @@ _BIAS_TYPES = [
 ]
 
 
-# TODO: Name of the dataset usually match the script name with CamelCase instead of snake_case
 class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
@@ -73,27 +72,17 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
                 "sent_more": datasets.Value("string"),
                 "sent_less": datasets.Value("string"),
                 "bias_type": datasets.Value("string"),
-                "prompt": datasets.Value("string")                
+                "prompt": datasets.Value("string"),
             }
         )
 
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
-            # This defines the different columns of the dataset and their types
-            features=features,  # Here we define them above because they are different between the two configurations
-            # Citation for the dataset
+            features=features,
             citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager):
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-        # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
-        # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
-        # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
-        # urls = _URLS[self.config.name]
         data_files = dl_manager.download_and_extract(_URLS)
 
         return [
@@ -108,10 +97,7 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
-                gen_kwargs={
-                    "filepaths": data_files,
-                    "split": "test"
-                },
+                gen_kwargs={"filepaths": data_files, "split": "test"},
             ),
             # datasets.SplitGenerator(
             #     name=datasets.Split.VALIDATION,
@@ -124,7 +110,7 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
         ]
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-    def _generate_examples(self, filepaths, split):
+    def _generate_examples(self, filepaths, split):  # pylint: disable=W0221
         cols = ["sent_more", "sent_less", "stereo_antistereo", "bias_type"]
 
         data_path, prompts_path = filepaths

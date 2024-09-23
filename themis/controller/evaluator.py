@@ -10,7 +10,6 @@ from themis.model.model import get_generation_args, get_model
 from themis.utils.config import Config
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class Evaluation:
@@ -18,7 +17,7 @@ class Evaluation:
 
     def __init__(self, cfg: Config) -> None:
         self.model = get_model(cfg=cfg)
-        self.params = {TaskManager(include_path=TASK_PATH)}
+        self.task_manager = TaskManager(include_path=TASK_PATH)
 
         # Random seeds
         self.random_seed = cfg.seed

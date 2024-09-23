@@ -1,6 +1,6 @@
-model: meta-llama/Meta-Llama-3.1-8B-Instruct
+model: meta-llama/Meta-Llama-3-8B-Instruct
 interface: vllm
-task: crows_pairs_qa
+task: crows_pairs_mc
 model_args:
   temperature: 0
   top_p: 0.95
@@ -8,4 +8,4 @@ model_args:
   max_tokens: 128
   seed: 2024
 eval_args:
-  limit: null
+  limit: 2
