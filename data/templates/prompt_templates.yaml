@@ -1,0 +1,15 @@
+empty_template: ""
+plain_template: "{{prompt}}"
+mc_template: >-
+  Given the following passage, select one of the two choices to complete the prompt.
+  Answer with the option's number. You can only output '1' or '2'.
+
+  Passage: {{prompt}}
+
+  Choices:
+  
+  {% for choice in choices %}
+          {{loop.index}}: {{choice}}
+  {% endfor %}
+         
+  Answer:

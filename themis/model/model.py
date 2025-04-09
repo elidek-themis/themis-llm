@@ -2,53 +2,57 @@
 from lm_eval.api.model import TemplateLM
 from lm_eval.models.vllm_causallms import VLLM
 
-from themis.utils.config import Config
+from themis.utils.config import Config, GenerationConfig, MultipleChoiceConfig
 
 
-def get_model(cfg: Config) -> TemplateLM:
+def get_model(config: Config) -> TemplateLM:
 
-    if cfg.interface == "huggingface":
+    if config.interface == "huggingface":
         pass
 
-    if cfg.interface == "vllm":
-        return VLLM(pretrained=cfg.model, max_gen_toks=cfg.max_tokens, seed=cfg.seed, trust_remote_code=True)
+    if config.interface == "vllm":
+        if isinstance(config, MultipleChoiceConfig):
+            return VLLM(pretrained=config.model, seed=config.seed)
+        if isinstance(config, GenerationConfig):
+            return VLLM(pretrained=config.model, max_gen_toks=config.max_tokens, seed=config.seed)
 
-    # if cfg.interface == "langchain_vllm":
+    # if config.interface == "langchain_vllm":
     #     return LCVLLM(
-    #         model=cfg.model,
-    #         max_new_tokens=cfg.max_tokens,
-    #         top_k=cfg.top_k,
-    #         top_p=cfg.top_p,
-    #         temperature=cfg.temperature
+    #         model=config.model,
+    #         max_new_tokens=config.max_tokens,
+    #         top_k=config.top_k,
+    #         top_p=config.top_p,
+    #         temperature=config.temperature
     #     )
 
-    if cfg.interface == "api":
+    if config.interface == "api":
         pass
 
-    raise NotImplementedError(f"{cfg.interface} not implemented")
+    raise NotImplementedError(f"{config.interface} not implemented")
 
 
-def get_all_seed(cfg: Config) -> dict:
+def get_all_seed(config: Config) -> dict:
     """Seeds for lm_eval.simple_evaluate"""
 
     return {
-        "random_seed": cfg.seed,
-        "numpy_random_seed": cfg.seed,
-        "torch_random_seed": cfg.seed,
-        "fewshot_random_seed": cfg.seed,
+        "random_seed": config.seed,
+        "numpy_random_seed": config.seed,
+        "torch_random_seed": config.seed,
+        "fewshot_random_seed": config.seed,
     }
 
 
-def get_generation_args(cfg: Config) -> str:
+def get_generation_args(config: Config) -> str:
     """
     String of comma separated argument assignments
     Used by lm_eval.simple_evaluate for generation tasks
     """
 
     gen_kwargs = {
-        "top_k": cfg.top_k,
-        "top_p": cfg.top_p,
-        "temperature": cfg.temperature,
+        "max_gen_tokens": config.max_tokens,
+        "top_k": config.top_k,
+        "top_p": config.top_p,
+        "temperature": config.temperature,
     }
 
     return ",".join([f"{arg}={value}" for arg, value in gen_kwargs.items()])

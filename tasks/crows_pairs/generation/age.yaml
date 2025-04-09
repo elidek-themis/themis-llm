@@ -1,0 +1,4 @@
+include: _default_template_yaml
+task: crows_pairs_gen_age
+task_alias: age
+process_docs: !function utils.filter_age

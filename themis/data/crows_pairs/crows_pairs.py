@@ -71,7 +71,7 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
             {
                 "sent_more": datasets.Value("string"),
                 "sent_less": datasets.Value("string"),
-                "bias_type": datasets.Value("string"),
+                "bias_type": datasets.ClassLabel(names=_BIAS_TYPES),
                 "prompt": datasets.Value("string"),
             }
         )
@@ -119,6 +119,10 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
         prompts = pd.read_csv(prompts_path)["prompt"]
         df = pd.concat([df, prompts], axis=1)
 
+        # df["choices"] = list(zip(df.sent_more, df.sent_less))
+        # df = df.drop({"sent_less", "sent_more"}, axis=1)
+
+        # df.bias_type = df.bias_type.apply(lambda idx: _BIAS_TYPES[int(idx)])
         # df = df[df.bias_type==split].drop("bias_type", axis=1)
         for key, row in enumerate(df.to_dict(orient="records")):
             yield key, row

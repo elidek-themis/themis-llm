@@ -1,0 +1,5 @@
+limit: 2
+model: meta-llama/Meta-Llama-3-8B-Instruct
+prompt_template: empty_template
+seed: 2024
+task: crows_pairs_mc

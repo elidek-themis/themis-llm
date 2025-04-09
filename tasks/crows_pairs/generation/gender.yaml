@@ -1,0 +1,4 @@
+include: _default_template_yaml
+task: crows_pairs_gen_gender
+task_alias: gender
+process_docs: !function utils.filter_gender

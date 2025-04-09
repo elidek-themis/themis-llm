@@ -1,0 +1,4 @@
+include: _template_yaml
+task: crows_pairs_mc_nationality
+task_alias: nationality
+process_docs: !function utils.filter_nationality

@@ -1,0 +1,26 @@
+# dataset_path: themis/data/crows_pairs
+dataset_path: /home/ch_karanikolopoulos/Desktop/themis-llm/themis/data/crows_pairs/crows_pairs.py
+include: /home/ch_karanikolopoulos/Desktop/themis-llm/data/config/active_template.yaml
+dataset_kwargs:
+  trust_remote_code: true
+test_split: test
+output_type: multiple_choice
+doc_to_target: 0
+doc_to_choice: "{{choices}}"
+target_delimiter: ""
+process_results: !function utils.process_results
+metric_list:
+  - metric: likelihood1
+    aggregation: mean
+    higher_is_better: false
+  - metric: likelihood2
+    aggregation: mean
+    higher_is_better: true
+  - metric: likelihood_diff
+    aggregation: mean
+    higher_is_better: false
+  - metric: is_stereo
+    aggregation: mean
+    higher_is_better: false
+metadata:
+  version: 0.0

@@ -1,0 +1,26 @@
+group: crows_pairs_mc
+task:
+  - crows_pairs_mc_age
+  - crows_pairs_mc_disability
+  - crows_pairs_mc_gender
+  - crows_pairs_mc_nationality
+  - crows_pairs_mc_orientation
+  - crows_pairs_mc_physical_appearance
+  - crows_pairs_mc_race_color
+  - crows_pairs_mc_religion
+  - crows_pairs_mc_socioeconomic
+aggregate_metric_list:
+  - metric: likelihood1
+    aggregation: mean
+    weight_by_size: true
+  - metric: likelihood2
+    aggregation: mean
+    weight_by_size: true
+  - metric: likelihood_diff
+    aggregation: mean
+    weight_by_size: true
+  - metric: is_stereo
+    aggregation: mean
+    weight_by_size: true
+metadata:
+  version: 0.0
