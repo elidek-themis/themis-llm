@@ -1,0 +1,25 @@
+task: residency_poll_1_2
+tag: residency_base
+dataset_path: themis/data/builders/persona/persona.py
+dataset_name: residency
+dataset_kwargs:
+  template: "In the 2024 U.S. presidential election, a voter in {persona} is likely to vote for the"
+  sub:
+    pattern: " in {persona}"
+    repl: ""
+  choices:
+    - "candidate of the Democrats"
+    - "candidate of the Democratic party"
+    - "candidate of the Republicans"
+    - "candidate of the Republican party"
+  columns:
+    - "candidate of the (D/R)"
+    - "candidate of the (D/R) party"
+  split: test
+  trust_remote_code: true
+metric_list:
+  - metric: acc
+  - metric: acc_norm
+  - metric: acc_mutual_info
+
+class: !function ../task.MultipleChoice 

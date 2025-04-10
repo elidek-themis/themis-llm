@@ -1,4 +1,0 @@
-include: _default_template_yaml
-task: crows_pairs_gen_race_color
-task_alias: race_color
-process_docs: !function utils.filter_race_color

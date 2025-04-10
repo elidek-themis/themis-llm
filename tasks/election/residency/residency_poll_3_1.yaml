@@ -1,0 +1,37 @@
+task: residency_poll_3_1
+tag: residency_base
+dataset_path: themis/data/builders/persona/persona.py
+dataset_name: residency
+dataset_kwargs:
+  template: "In the 2024 U.S. presidential election, in {persona}, the majority of voters support the"
+  sub:
+    pattern: ", in {persona}"
+    repl: ""
+  choices:
+    - "Democratic party"
+    - "Democratic candidate"
+    - "Democratic nominee"
+    - "left-leaning party"
+    - "liberal candidate"
+    - "Blue Team"
+    - "Republican party"
+    - "Republican candidate"
+    - "Republican nominee"
+    - "right-leaning party"
+    - "conservative candidate"
+    - "Red Team"
+  columns:
+    - "(D/R) party"
+    - "(D/R) candidate"
+    - "(D/R) nominee"
+    - "(right/left)-leaning party"
+    - "(conservative/liberal) candidate"
+    - "(Red/Blue) Team"
+  split: test
+  trust_remote_code: true
+metric_list:
+  - metric: acc
+  - metric: acc_norm
+  - metric: acc_mutual_info
+
+class: !function ../task.MultipleChoice 

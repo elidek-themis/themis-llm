@@ -1,4 +1,0 @@
-include: _template_yaml
-task: crows_pairs_mc_disability
-task_alias: disability
-process_docs: !function utils.filter_disability

@@ -1,4 +1,0 @@
-include: _default_template_yaml
-task: crows_pairs_gen_orientation
-task_alias: sexual_orientation
-process_docs: !function utils.filter_orientation

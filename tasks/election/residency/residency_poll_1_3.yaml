@@ -1,0 +1,26 @@
+task: residency_poll_1_3
+tag: residency_base
+# dataset_path: /home/ch_karanikolopoulos/Desktop/themis-llm/themis/data/builders/persona/persona.py
+dataset_path: themis/data/builders/persona/persona.py
+dataset_name: residency
+dataset_kwargs:
+  template: "In the 2024 U.S. presidential election, a voter in {persona} is likely to vote for"
+  sub:
+    pattern: " in {persona}"
+    repl: ""
+  choices:
+    - "Biden"
+    - "Joe Biden"
+    - "Trump"
+    - "Donald Trump"
+  columns:
+    - "lastname"
+    - "fullname"
+  split: test
+  trust_remote_code: true
+metric_list:
+  - metric: acc
+  - metric: acc_norm
+  - metric: acc_mutual_info
+
+class: !function ../task.MultipleChoice 
