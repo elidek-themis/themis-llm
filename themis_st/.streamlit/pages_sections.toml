@@ -1,0 +1,36 @@
+[[pages]]
+path = "pages/themis.py"
+name = "Themis"
+icon = ""
+
+[[pages]]
+name = "Interface"
+icon = ""
+is_section = true
+
+[[pages]]
+path = "pages/interface.py"
+name = "Setup"
+icon = ""
+
+[[pages]]
+path = "pages/prompt.py"
+name = "Prompt Explorer"
+icon = ""
+
+[[pages]]
+name = "LLM Election Polls"
+icon = ""
+is_section = true
+
+
+[[pages]]
+path = "pages/overview.py"
+name = "Overview"
+icon = ""
+
+[[pages]]
+path = "pages/summary.py"
+name = "Summary"
+icon = ""
+
