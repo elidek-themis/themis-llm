@@ -1,0 +1,2 @@
+class ExperimentExists(Exception):
+    pass

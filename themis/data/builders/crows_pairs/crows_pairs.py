@@ -55,13 +55,10 @@ _BIAS_TYPES = [
 
 
 class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
-
     VERSION = datasets.Version("1.1.0")
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(name="test", version=VERSION, description="CrowS-Pairs")
-        # datasets.BuilderConfig(name="age", version=VERSION, description="CrowS-Pairs age"),
     ]
 
     DEFAULT_CONFIG_NAME = "test"
@@ -69,10 +66,11 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
     def _info(self):
         features = datasets.Features(
             {
+                "prompt": datasets.Value("string"),
                 "sent_more": datasets.Value("string"),
                 "sent_less": datasets.Value("string"),
-                "bias_type": datasets.ClassLabel(names=_BIAS_TYPES),
-                "prompt": datasets.Value("string"),
+                # "choices": datasets.Sequence(datasets.Value("string")),
+                "bias_type": datasets.ClassLabel(names=_BIAS_TYPES)
             }
         )
 
@@ -86,31 +84,14 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
         data_files = dl_manager.download_and_extract(_URLS)
 
         return [
-            # datasets.SplitGenerator(
-            #     name=datasets.Split.TRAIN,
-            #     # These kwargs will be passed to _generate_examples
-            #     gen_kwargs={
-            #         "filepaths": data_files,
-            #         "split": "train",
-            #     },
-            # ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                # These kwargs will be passed to _generate_examples
-                gen_kwargs={"filepaths": data_files, "split": "test"},
-            ),
-            # datasets.SplitGenerator(
-            #     name=datasets.Split.VALIDATION,
-            #     # These kwargs will be passed to _generate_examples
-            #     gen_kwargs={
-            #         "filepath": os.path.join(data_dir, "dev.jsonl"),
-            #         "split": "dev",
-            #     },
-            # ),
+                gen_kwargs={"filepaths": data_files},
+            )
         ]
 
-    # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-    def _generate_examples(self, filepaths, split):  # pylint: disable=W0221
+
+    def _generate_examples(self, filepaths):
         cols = ["sent_more", "sent_less", "stereo_antistereo", "bias_type"]
 
         data_path, prompts_path = filepaths
@@ -119,10 +100,13 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
         prompts = pd.read_csv(prompts_path)["prompt"]
         df = pd.concat([df, prompts], axis=1)
 
-        # df["choices"] = list(zip(df.sent_more, df.sent_less))
-        # df = df.drop({"sent_less", "sent_more"}, axis=1)
-
-        # df.bias_type = df.bias_type.apply(lambda idx: _BIAS_TYPES[int(idx)])
-        # df = df[df.bias_type==split].drop("bias_type", axis=1)
         for key, row in enumerate(df.to_dict(orient="records")):
-            yield key, row
+            # choices = (row["sent_more"], row["sent_less"])
+            print(row["bias_type"])
+            yield key, {
+                "sent_more": row["sent_more"],
+                "sent_less": row["sent_less"],                
+                "prompt": row["prompt"],
+                # "choices": choices,
+                "bias_type": row["bias_type"]
+                }
