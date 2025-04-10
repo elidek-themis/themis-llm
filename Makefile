@@ -12,3 +12,6 @@ clear_pycache:
 
 diagnose:
 	@pre-commit run --all-files
+
+count_loc:
+	@find . -name '*.py' | xargs wc -l | sort -nr
