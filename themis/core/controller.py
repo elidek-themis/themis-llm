@@ -4,9 +4,9 @@ from typing import Dict, Union
 from hydra.core.hydra_config import DictConfig, OmegaConf
 
 from themis.core.experiment import Experiment
+from themis.core.model.inference import inference
 from themis.data.repository import Repository
 from themis.definitions.config import Config, table_print
-from themis.core.model.inference import inference
 
 logger = logging.getLogger(__name__)
 

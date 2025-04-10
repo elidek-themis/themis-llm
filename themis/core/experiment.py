@@ -49,10 +49,7 @@ class Experiment:
         logger.info("Running evaluation task")
 
         results = lm_eval.simple_evaluate(
-            model=lm,
-            tasks=self.config.task,
-            task_manager=self.task_manager,
-            **self.config.eval_kwargs.model_dump()
+            model=lm, tasks=self.config.task, task_manager=self.task_manager, **self.config.eval_kwargs.model_dump()
         )
         # update with the (modified) experiment config
         results["config"] = self.config

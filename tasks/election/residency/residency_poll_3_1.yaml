@@ -34,4 +34,4 @@ metric_list:
   - metric: acc_norm
   - metric: acc_mutual_info
 
-class: !function ../task.MultipleChoice 
+class: !function ../task.MultipleChoice

@@ -35,7 +35,7 @@ class EvalArguments(BaseModel, frozen=True):
         if value is None:
             return False
         return value
-    
+
     @field_validator("limit")
     def validate_limit(cls, value: Optional[Union[float, int]]) -> Optional[Union[float, int]]:
         if isinstance(value, float):
@@ -67,13 +67,11 @@ class Config(BaseModel, frozen=True):
     interface: InterfaceConfig = Field(...)
     experiment: ExperimentConfig = Field(...)
 
-
     @field_validator("model")
     def validate_model(cls, value: str) -> str:
         if value == MISSING:
             raise ValueError("Missing mandatory value: model")
         return value
-    
 
     @field_validator("seed")
     def validate_seed(cls, value: int) -> int:

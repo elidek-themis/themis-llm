@@ -57,9 +57,7 @@ _BIAS_TYPES = [
 class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
     VERSION = datasets.Version("1.1.0")
 
-    BUILDER_CONFIGS = [
-        datasets.BuilderConfig(name="test", version=VERSION, description="CrowS-Pairs")
-    ]
+    BUILDER_CONFIGS = [datasets.BuilderConfig(name="test", version=VERSION, description="CrowS-Pairs")]
 
     DEFAULT_CONFIG_NAME = "test"
 
@@ -70,7 +68,7 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
                 "sent_more": datasets.Value("string"),
                 "sent_less": datasets.Value("string"),
                 # "choices": datasets.Sequence(datasets.Value("string")),
-                "bias_type": datasets.ClassLabel(names=_BIAS_TYPES)
+                "bias_type": datasets.ClassLabel(names=_BIAS_TYPES),
             }
         )
 
@@ -90,7 +88,6 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
             )
         ]
 
-
     def _generate_examples(self, filepaths):
         cols = ["sent_more", "sent_less", "stereo_antistereo", "bias_type"]
 
@@ -105,8 +102,8 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
             print(row["bias_type"])
             yield key, {
                 "sent_more": row["sent_more"],
-                "sent_less": row["sent_less"],                
+                "sent_less": row["sent_less"],
                 "prompt": row["prompt"],
                 # "choices": choices,
-                "bias_type": row["bias_type"]
-                }
+                "bias_type": row["bias_type"],
+            }

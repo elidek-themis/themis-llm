@@ -4,7 +4,7 @@ defaults:
   - experiment: multiple_choice
   - _self_
 
-task: 
+task:
   - residency_poll_1_1
   - residency_poll_1_2
   - residency_poll_1_3

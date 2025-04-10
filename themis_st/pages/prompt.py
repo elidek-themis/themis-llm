@@ -1,26 +1,27 @@
 import math
 import time
+
 import pandas as pd
 import streamlit as st
+from annotated_text import annotated_text, annotation
 
 from themis_st.processing.model import Connection
-from annotated_text import annotated_text, annotation
 
 st.title("Prompt Explorer")
 
 if "con" not in st.session_state:
     st.session_state.con = None
-    
+
 if "completion" not in st.session_state:
     st.session_state.completion = None
-    
+
 with st.sidebar:
     with st.expander("Connection", expanded=True):
         if st.session_state.con:
             st.write(st.session_state.con.credentials)
             if st.button("Ping 〽️"):
                 url = st.session_state.con.credentials["url"]
-                response = Connection.request(method="GET", url=url+"/health")
+                response = Connection.request(method="GET", url=url + "/health")
                 if response.status_code == 200:
                     st.toast("Pong 🏓")
         else:
@@ -36,40 +37,40 @@ def submit():
             logprobs=20,
             max_tokens=1,
             temperature=0,
-            extra_body={"prompt_logprobs": 20}
+            extra_body={"prompt_logprobs": 20},
         )
     else:
         st.dialog("Oops")
         time.sleep(0.75)
 
 
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+
 
 def get_hex_color(value):
     rgba = plt.cm.RdYlGn(value)  # Get RGBA
     return mcolors.rgb2hex(rgba)  # Convert to HEX (e.g., '#a6d96a')
 
-    
+
 if st.session_state.con:
     with st.form("form"):
         st.text_input("#### Prompt", key="prompt")
         st.form_submit_button("Generate", on_click=submit)
-    
 
     if st.session_state.completion:
-        
+
         (next_token,) = st.session_state.completion.choices
         (next_logprobs,) = next_token.logprobs.top_logprobs
         prompt_logprobs = next_token.prompt_logprobs
-        
+
         encoded_prompt = []
         for prompt in prompt_logprobs[1:]:
             token_id = next(iter(prompt))
             encoded_prompt.append({"token": token_id} | prompt[token_id])
         encoded_prompt = pd.DataFrame(encoded_prompt)
         encoded_prompt["probability"] = encoded_prompt.logprob.apply(lambda x: math.exp(x))
-        
+
         annotations = []
         for i, row in encoded_prompt.iterrows():
             token = row.decoded_token
@@ -77,10 +78,9 @@ if st.session_state.con:
             color = get_hex_color(prob)
             annotations.append(annotation(token, color="black", border=f"; background: {color}"))
         annotated_text(*annotations)
-        
+
         # encoded_prompt = encoded_prompt.set_index("decoded_token").T
-        
-        
+
         next_tab, prompt_tab = st.tabs(["next token", "prompt"])
         with next_tab:
             next_logprobs = pd.Series(next_logprobs)

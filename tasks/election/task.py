@@ -1,10 +1,9 @@
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+
 import numpy as np
-
-from typing import Any, Dict, Optional, List, Iterable, Tuple, Mapping, Union, Callable
-
+from lm_eval import utils
 from lm_eval.api.instance import Instance
 from lm_eval.api.task import ConfigurableTask
-from lm_eval import utils
 
 
 class MultipleChoice(ConfigurableTask):
@@ -12,25 +11,23 @@ class MultipleChoice(ConfigurableTask):
     VERSION = 0
 
     def __init__(self, config) -> None:
-            config.pop("class", None)
-            config.update({"output_type": self.OUTPUT_TYPE})
-            # config.update({"aggregate_metric": self.aggregation})
-            config.update({"metadata": {"version": self.VERSION}})
-            super().__init__(config=config)
-    
+        config.pop("class", None)
+        config.update({"output_type": self.OUTPUT_TYPE})
+        # config.update({"aggregate_metric": self.aggregation})
+        config.update({"metadata": {"version": self.VERSION}})
+        super().__init__(config=config)
+
     def doc_to_text(self, doc, doc_to_text=None):
         return doc["input"]
-    
+
     def doc_to_target(self, doc: Mapping, doc_to_target=None) -> Union[int, str, list]:
         pass
 
     def has_test_docs(self):
         return True
-    
-    
+
     def test_docs(self):
         return self.dataset
-
 
     def fewshot_context(
         self,
@@ -42,7 +39,7 @@ class MultipleChoice(ConfigurableTask):
         chat_template: Optional[Callable] = None,
         gen_prefix: Optional[str] = None,
     ) -> str:
-        
+
         # if system_instruction:
         #     system_instruction = utils.apply_template(system_instruction, doc)
         # if gen_prefix:
@@ -56,41 +53,37 @@ class MultipleChoice(ConfigurableTask):
         #     chat_template=chat_template,
         #     gen_prefix=gen_prefix
         # )
-        
+
         ctx = self.doc_to_text(doc)
         if isinstance(ctx, list):
             if apply_chat_template:
                 chat_ctx = chat_template(ctx)
                 return chat_ctx
             else:
-                raise Exception(
-                    "Got chat template format, but apply_chat_template is false."
-                )
+                raise Exception("Got chat template format, but apply_chat_template is false.")
         else:
             return ctx
-    
-    
+
     def _create_arguments(self, doc: dict, ctx: str) -> List[Tuple]:
         arguments = []
-        
+
         for choice in doc["choices"]:
-            arguments.append((ctx, " {}".format(choice))) # whitespace in completion
+            arguments.append((ctx, " {}".format(choice)))  # whitespace in completion
             if "acc_mutual_info" in self._metric_fn_list.keys():
-                arguments.append(("", f"{choice}")) # unconditional loglikelihood
-        
+                arguments.append(("", f"{choice}"))  # unconditional loglikelihood
+
         return arguments
-        
 
     def construct_requests(self, doc: dict, ctx: str, **kwargs) -> List[Instance]:
         kwargs.pop("apply_chat_template", False)
         kwargs.pop("chat_template", None)
-        
+
         arguments = self._create_arguments(doc=doc, ctx=ctx)
         request_list = [
             Instance(
                 request_type="loglikelihood",
                 doc=doc,
-                arguments=arg, 
+                arguments=arg,
                 idx=i,
                 **kwargs,
             )
@@ -103,39 +96,31 @@ class MultipleChoice(ConfigurableTask):
         lls, _ = zip(*results)
 
         choices = doc["choices"]
-    
-        if (
-            2 * len(choices) == len(lls)
-            and "acc_mutual_info" in self._metric_fn_list.keys()
-        ):
-            lls_unconditional = lls[1::2] # unconditional answer loglikelihoods 
+
+        if 2 * len(choices) == len(lls) and "acc_mutual_info" in self._metric_fn_list.keys():
+            lls_unconditional = lls[1::2]  # unconditional answer loglikelihoods
             if len(lls_unconditional) != len(choices):
                 raise ValueError
-            lls = lls[::2] # conditional loglikelihoods
+            lls = lls[::2]  # conditional loglikelihoods
 
             lls, lls_unconditional = map(np.array, (lls, lls_unconditional))
-            result_dict.update({"acc":lls, "acc_mutual_info":lls - lls_unconditional})
-        
+            result_dict.update({"acc": lls, "acc_mutual_info": lls - lls_unconditional})
+
         if "acc_norm" in self._metric_fn_list.keys():
             completion_len = np.array([float(len(i)) for i in choices])
             result_dict.update({"acc_norm": lls / completion_len})
-        
+
         result_dict.update({"acc": np.array(lls)})
-        
+
         return result_dict
-        
-        
+
     def aggregation(self):
         choices = self.config.dataset_kwargs["choices"]
 
         def y_map(y):
             return dict(zip(choices, y))
-        
-        byp = lambda _: _        
+
+        byp = lambda _: _
         agg = lambda _: list(map(y_map, _))
-        
-        return {
-            "acc": byp,
-            "acc_norm": byp,
-            "acc_mutual_info": byp
-        }
+
+        return {"acc": byp, "acc_norm": byp, "acc_mutual_info": byp}
