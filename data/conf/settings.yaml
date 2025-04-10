@@ -1,0 +1,15 @@
+hydra:
+  output_subdir: null 
+  run:
+    dir: data/experiments/${slug:3}
+  sweep:
+    dir: data/experiments/
+    subdir: ${slug:3}
+  callbacks:
+      save_job_info:
+        _target_: themis.utils.callbacks.MyCallback
+
+defaults:
+  - override hydra/job_logging: custom
+
+seed: 2025

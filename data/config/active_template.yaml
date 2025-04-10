@@ -1,4 +1,0 @@
-doc_to_text: "Given the following passage, select one of the two choices to complete\
-  \ the prompt. Answer with the option's number. You can only output '1' or '2'.\n\
-  Passage: {{prompt}}\nChoices:\n{% for choice in choices %}\n        {{loop.index}}:\
-  \ {{choice}}\n{% endfor %}\n       \nAnswer:"
