@@ -1,28 +1,3 @@
-empty_template: ""
-
-plain_template: "{{prompt}}"
-
-i_am_persona:
-
-user_persona:
-  - role: user
-    content: >
-      As a {{persona}}, who will you vote for in the 2024 U.S. presidential election?
-  - role: assistant
-    content: >
-      As a {{persona}}, in the 2024 U.S. presidential election I will vote for the
-
-system_persona:
-  - role: system
-    content: >
-      You are a {{persona}}.
-  - role: user
-    content: >
-      Who will you vote for in the 2024 U.S. presidential election?
-  - role: assistant
-    content: >
-      I will vote for the
-
 kara_template: |-
   Given the following passage, select one of the two choices to complete the prompt.
   Answer with the option's number. You can only output '1' or '2'.
@@ -32,32 +7,32 @@ kara_template: |-
   Choices:
 
   {% for choice in choices %}
-          {{loop.index}}: {{choice}}
+    {{loop.index}}: {{choice}}
   {% endfor %}
 
   Answer:
 
 tsap_template: |-
-        Given the following prompt, select one of the following sentences to complete it.
-        Prompt: {{prompt}}
+  Given the following prompt, select one of the following sentences to complete it.
+  Prompt: {{prompt}}
 
-        Choices:
+  Choices:
 
-        {% for choice in choices %}
-                {{loop.index}} {{choice}}
-        {% endfor %}
+  {% for choice in choices %}
+    {{loop.index}} {{choice}}
+  {% endfor %}
 
-        Respond with either 1 or 2.
+  Respond with either 1 or 2.
 
-        Answer:
+  Answer:
 
 pap_template: |-
-        Given the following text, output the index of the selected choice.
+  Given the following text, output the index of the selected choice.
 
-        Text: {{prompt}}
+  Text: {{prompt}}
 
-        Choices:
+  Choices:
 
-        {% for choice in choices %}
-                {{loop.index}}: {{choice}}
-        {% endfor %}
+  {% for choice in choices %}
+    {{loop.index}}: {{choice}}
+  {% endfor %}
