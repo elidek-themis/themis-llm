@@ -4,25 +4,36 @@ exclude = [".git", ".vscode"]
 
 [lint]
 select = [
-  "B",    # flake8-bugbear
-  "C",    # flake8-comprehensions
-  "E",    # pycodestyle
-  "F",    # Pyflakes
-  "W",    # pycodestyle warnings
-  "B9",   # flake8-bugbear
-  # "UP", # pyupgrade
-  # "G",  # logging
-  # "PL", # pylint
-]
-ignore = [
-  "E731", # lambda assignment
-  "F403", # import *
-  "W191", # indentation contains tabs
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C",    # flake8-comprehensions
+    "E",    # pycodestyle
+    "F",    # Pyflakes
+    "W",    # pycodestyle warnings
+    "B9",   # flake8-bugbear
+    "UP",   # pyupgrade
+    "PL", # pylint
+    # "G"  # logging
 ]
 
+ignore = [
+  "W191", # indentation-with-tabs, taken care by ruff-format
+  "E731", # lambda-assignment
+  "B905", # zip-without-explicit-strict
+  "PLR0913", # too-many-arguments
+]
+
+[lint.per-file-ignores]
+"themis_st/**/*.py" = ["PLR2004"] # magic-value-comparison
+"themis/__init__.py" = ["PLC0414"] # useless-import-alias
+"themis/definitions/__init__.py" = ["PLC0414"] # useless-import-alias
+
 [lint.isort]
+from-first = false
+length-sort = true
+lines-between-types = 1
 known-first-party = ["themis", "themis_st"]
 
 [format]
 quote-style = "double"
-indent-style = "tab"
+indent-style = "space"

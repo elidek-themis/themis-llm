@@ -31,10 +31,10 @@ repos:
     rev: v0.11.7
     hooks:
       - id: ruff
-        # args: ["--fix"]
+        args: ["--diff"]
         types:
         - python
       - id: ruff-format
-        # args: ["--fix"]
+        args: ["--diff"]
         types:
         - python
