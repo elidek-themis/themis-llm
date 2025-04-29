@@ -1,5 +1,5 @@
 default_stages:
-- commit
+- pre-commit
 exclude: node_modules|.git|.tox
 fail_fast: true
 repos:
