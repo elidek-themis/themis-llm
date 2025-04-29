@@ -3,7 +3,10 @@ import time
 
 import pandas as pd
 import streamlit as st
-from annotated_text import annotated_text, annotation
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+
+from annotated_text import annotation, annotated_text
 
 from themis_st.processing.model import Connection
 
@@ -44,10 +47,6 @@ def submit():
         time.sleep(0.75)
 
 
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
-
-
 def get_hex_color(value):
     rgba = plt.cm.RdYlGn(value)  # Get RGBA
     return mcolors.rgb2hex(rgba)  # Convert to HEX (e.g., '#a6d96a')
@@ -59,7 +58,6 @@ if st.session_state.con:
         st.form_submit_button("Generate", on_click=submit)
 
     if st.session_state.completion:
-
         (next_token,) = st.session_state.completion.choices
         (next_logprobs,) = next_token.logprobs.top_logprobs
         prompt_logprobs = next_token.prompt_logprobs
@@ -72,7 +70,7 @@ if st.session_state.con:
         encoded_prompt["probability"] = encoded_prompt.logprob.apply(lambda x: math.exp(x))
 
         annotations = []
-        for i, row in encoded_prompt.iterrows():
+        for _, row in encoded_prompt.iterrows():
             token = row.decoded_token
             prob = row.probability
             color = get_hex_color(prob)

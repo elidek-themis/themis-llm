@@ -1,10 +1,8 @@
 import logging
-import time
 
 import requests
-from openai import OpenAI
 
-from themis.definitions.config import InterfaceConfig
+from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 

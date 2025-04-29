@@ -1,15 +1,16 @@
-import logging
 import pickle
 import shutil
-import sys
+import logging
+
+from typing import Any
 from pathlib import Path
-from typing import Any, Dict
 
 import yaml
+
+from omegaconf import DictConfig
+from hydra.types import TaskFunction
 from hydra.core.utils import JobReturn, JobStatus
 from hydra.experimental.callback import Callback
-from hydra.types import RunMode, TaskFunction
-from omegaconf import DictConfig
 
 from themis.definitions.config import ExperimentConfig
 from themis.definitions.exceptions import ExperimentExists
@@ -38,7 +39,7 @@ class MyCallback(Callback):
             self.log.error(e, exc_info=True)
             self._rm_dir(output_dir)
             return
-        except Exception as e:
+        except Exception:
             import traceback
 
             print(traceback.format_exc())
@@ -51,7 +52,7 @@ class MyCallback(Callback):
         self.log.info(f"Deleting empty dir {output_dir}")
         shutil.rmtree(output_dir)
 
-    def _save_results(self, config: DictConfig, results: Dict[str, Any], output_dir: Path) -> None:
+    def _save_results(self, config: DictConfig, results: dict[str, Any], output_dir: Path) -> None:
         exp_cfg: ExperimentConfig = results.get("config", {})
 
         filename = "experiment.yaml"

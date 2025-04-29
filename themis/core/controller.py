@@ -1,12 +1,11 @@
 import logging
-from typing import Dict, Union
 
-from hydra.core.hydra_config import DictConfig, OmegaConf
+from hydra.core.hydra_config import OmegaConf, DictConfig
 
 from themis.core.experiment import Experiment
-from themis.core.model.inference import inference
 from themis.data.repository import Repository
 from themis.definitions.config import Config, table_print
+from themis.core.model.inference import inference
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class Controller:
 
         return config
 
-    def run_experiment_job(self) -> Union[Dict, None]:
+    def run_experiment_job(self) -> dict | None:
         inference.setup(interface=self.config.interface)  # initiliaze model
         results = self.experiment.evaluate(lm=inference.lm)  # run evaluation
 

@@ -1,22 +1,19 @@
 import json
-import logging
-import subprocess
 import time
+import subprocess
+
 from ast import literal_eval
 
-import pandas as pd
 import requests
 import streamlit as st
-from code_editor import code_editor
+
 from pydantic import ValidationError
+from code_editor import code_editor
 from streamlit.logger import get_logger
-from streamlit_extras.capture import logcapture
 from vllm.engine.arg_utils import EngineArgs
 
 from themis_st.processing.model import Connection
 from themis_st.processing.utils import VLLMArgs, get_model_hub
-
-# st.set_page_config(layout="wide")
 
 TEMPLATE_CFG = {
     # "model": "facebook/opt-125m",
@@ -36,7 +33,7 @@ st_logger = get_logger(__name__)
 
 
 if "vllm_config" not in st.session_state:
-    st.session_state.vllm_config = dict()
+    st.session_state.vllm_config = {}
 
 # if "credentials" not in st.session_state:
 #     st.session_state.credentials = dict()

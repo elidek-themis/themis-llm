@@ -1,14 +1,11 @@
-import logging
-import os.path as osp
 import re
-from typing import List, Optional
+import logging
 
-import coolname
 import hydra
-from hydra.core.hydra_config import DictConfig, OmegaConf
-from yaml import FullLoader, dump, load
+import coolname
 
-from themis.definitions.constants import CONFIG_PATH, TEMPLATES_PATH
+from yaml import FullLoader, load
+from hydra.core.hydra_config import DictConfig
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +21,7 @@ class CustomFormatter(logging.Formatter):
         elif "themis" in record.pathname:
             module = "Themis"
 
-        return "[%s - %s] [%s %s:%s] %s" % (
+        return "[{} - {}] [{} {}:{}] {}".format(
             module,
             record.levelname,
             self.formatTime(record, datefmt="%m-%d %H:%M:%S"),
@@ -43,7 +40,7 @@ def slug(count: int) -> str:
     return coolname.generate_slug(count).replace("-", "_")
 
 
-def recompose_config(config_dir: str, overrides_path: Optional[List[str]] = None) -> DictConfig:
+def recompose_config(config_dir: str, overrides_path: list[str] | None = None) -> DictConfig:
     with hydra.initialize_config_dir(version_base=None, config_dir=config_dir):
         return hydra.compose(config_name="config", return_hydra_config=False)
 

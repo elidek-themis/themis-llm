@@ -1,9 +1,8 @@
-import ast
 import re
-from typing import Any, Dict, Generator, List, Tuple, Union
+import ast
 
-import datasets
 import pandas as pd
+import datasets
 
 _DESCRIPTION = "U.S. Elections Prompts for Political Polling"
 _HOMEPAGE = ""
@@ -69,12 +68,16 @@ _STATES = [
 class PersonaConfig(datasets.BuilderConfig):
     def __init__(
         self,
-        template: str | List[Dict[str, str]],
-        sub: Dict[str, str] | None = None,
-        choices: List[str] = [],
-        columns: List[str] = [],
+        template: str | list[dict[str, str]],
+        sub: dict[str, str] | None = None,
+        choices: list[str] = None,
+        columns: list[str] = None,
         **kwargs,
     ):
+        if choices is None:
+            choices = []
+        if columns is None:
+            columns = []
 
         super().__init__(**kwargs)
 
@@ -160,7 +163,7 @@ class Persona(datasets.GeneratorBasedBuilder):
         elif split == "demographic":
             return self._generate_demographic_examples(path)
 
-    def _format(self, persona: str) -> Union[str, List[dict]]:
+    def _format(self, persona: str) -> str | list[dict]:
         if self.is_chat:
             return ast.literal_eval(re.sub(string=self.template, pattern="{persona}", repl=persona))
         else:

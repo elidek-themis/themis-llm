@@ -1,21 +1,20 @@
 import os.path as osp
-import re
 
 import pandas as pd
 import streamlit as st
 
 from themis.data.repository import Repository
-from themis.definitions.constants import RAW_PATH
 from themis_st.processing.plot import catplot
+from themis_st.processing.style import stats_styler
+from themis.definitions.constants import RAW_PATH
 from themis_st.processing.process import (
     ElectionResults,
-    get_differences,
     get_nll_df,
-    get_prob_df,
     get_voting,
+    get_prob_df,
+    get_differences,
     get_voting_stats,
 )
-from themis_st.processing.style import stats_styler
 
 voting_20 = get_voting(voting_path=osp.join(RAW_PATH, "voting-2020.xlsx"))
 voting_24 = get_voting(voting_path=osp.join(RAW_PATH, "voting-2024.xlsx"))

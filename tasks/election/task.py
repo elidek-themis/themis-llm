@@ -1,9 +1,9 @@
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from collections.abc import Mapping, Callable, Iterable
 
 import numpy as np
-from lm_eval import utils
-from lm_eval.api.instance import Instance
+
 from lm_eval.api.task import ConfigurableTask
+from lm_eval.api.instance import Instance
 
 
 class MultipleChoice(ConfigurableTask):
@@ -20,7 +20,7 @@ class MultipleChoice(ConfigurableTask):
     def doc_to_text(self, doc, doc_to_text=None):
         return doc["input"]
 
-    def doc_to_target(self, doc: Mapping, doc_to_target=None) -> Union[int, str, list]:
+    def doc_to_target(self, doc: Mapping, doc_to_target=None) -> int | str | list:
         pass
 
     def has_test_docs(self):
@@ -33,13 +33,12 @@ class MultipleChoice(ConfigurableTask):
         self,
         doc: str,
         num_fewshot: int,
-        system_instruction: Optional[str] = None,
+        system_instruction: str | None = None,
         apply_chat_template: bool = False,
         fewshot_as_multiturn: bool = False,
-        chat_template: Optional[Callable] = None,
-        gen_prefix: Optional[str] = None,
+        chat_template: Callable | None = None,
+        gen_prefix: str | None = None,
     ) -> str:
-
         # if system_instruction:
         #     system_instruction = utils.apply_template(system_instruction, doc)
         # if gen_prefix:
@@ -64,17 +63,17 @@ class MultipleChoice(ConfigurableTask):
         else:
             return ctx
 
-    def _create_arguments(self, doc: dict, ctx: str) -> List[Tuple]:
+    def _create_arguments(self, doc: dict, ctx: str) -> list[tuple]:
         arguments = []
 
         for choice in doc["choices"]:
-            arguments.append((ctx, " {}".format(choice)))  # whitespace in completion
+            arguments.append((ctx, f" {choice}"))  # whitespace in completion
             if "acc_mutual_info" in self._metric_fn_list.keys():
                 arguments.append(("", f"{choice}"))  # unconditional loglikelihood
 
         return arguments
 
-    def construct_requests(self, doc: dict, ctx: str, **kwargs) -> List[Instance]:
+    def construct_requests(self, doc: dict, ctx: str, **kwargs) -> list[Instance]:
         kwargs.pop("apply_chat_template", False)
         kwargs.pop("chat_template", None)
 
@@ -91,8 +90,8 @@ class MultipleChoice(ConfigurableTask):
         ]
         return request_list
 
-    def process_results(self, doc: dict, results: Iterable[Tuple[float, bool]]) -> dict:
-        result_dict = dict()
+    def process_results(self, doc: dict, results: Iterable[tuple[float, bool]]) -> dict:
+        result_dict = {}
         lls, _ = zip(*results)
 
         choices = doc["choices"]
@@ -121,6 +120,6 @@ class MultipleChoice(ConfigurableTask):
             return dict(zip(choices, y))
 
         byp = lambda _: _
-        agg = lambda _: list(map(y_map, _))
+        # agg = lambda _: list(map(y_map, _))
 
         return {"acc": byp, "acc_norm": byp, "acc_mutual_info": byp}

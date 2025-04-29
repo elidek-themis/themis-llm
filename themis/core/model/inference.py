@@ -1,8 +1,10 @@
 import gc
 import logging
-from typing import Any, Type
+
+from typing import Any
 
 import torch
+
 from lm_eval.models.huggingface import HFLM
 from lm_eval.models.vllm_causallms import VLLM
 
@@ -30,13 +32,12 @@ def register_backend(name):
 def get_model(model_name):
     try:
         return BACKEND_REGISTRY[model_name]
-    except KeyError:
-        raise ValueError(f"Supported backend names: {', '.join(BACKEND_REGISTRY.keys())}")
+    except KeyError as e:
+        raise ValueError(f"Supported backend names: {', '.join(BACKEND_REGISTRY.keys())}") from e
 
 
 class __Inference:
-
-    backend: Type[Any] = None
+    backend: type[Any] = None
     config: InterfaceConfig = None
 
     @classmethod

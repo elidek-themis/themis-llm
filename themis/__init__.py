@@ -1,1 +1,1 @@
-from .definitions import __version__
+from themis.definitions import __version__ as __version__

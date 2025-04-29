@@ -1,10 +1,12 @@
 import logging
-from typing import Any, Dict
+
+from typing import Any
 
 import lm_eval
-from lm_eval.api.group import ConfigurableGroup
-from lm_eval.api.task import ConfigurableTask
+
 from lm_eval.tasks import TaskManager, get_task_dict
+from lm_eval.api.task import ConfigurableTask
+from lm_eval.api.group import ConfigurableGroup
 
 from themis.data.repository import Repository
 from themis.definitions.config import ExperimentConfig
@@ -25,7 +27,7 @@ class Experiment:
         task_dict = self._sanitize_task_dict(task_dict=task_dict, repo=repo)
         self.config.task, self.tasks = zip(*task_dict.items())
 
-    def _sanitize_task_dict(self, task_dict: Dict[Any, Any], repo: Repository) -> Dict[str, ConfigurableTask]:
+    def _sanitize_task_dict(self, task_dict: dict[Any, Any], repo: Repository) -> dict[str, ConfigurableTask]:
         task = next(iter(task_dict))  # first entry of task_dict
         # combine sub task dicts if this is a group
         if isinstance(task, ConfigurableGroup):

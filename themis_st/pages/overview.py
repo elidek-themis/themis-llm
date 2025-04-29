@@ -1,14 +1,21 @@
-import os.path as osp
 import re
+import os.path as osp
 
 import pandas as pd
 import streamlit as st
 
-from themis.data.repository import ExperimentOutput, Repository
+from themis.data.repository import Repository, ExperimentOutput
+from themis_st.processing.plot import catplot
+from themis_st.processing.style import nll_styler, diff_styler, prob_styler, stats_styler, norm_prob_styler
 from themis.definitions.constants import RAW_PATH
-from themis_st.processing.plot import *
-from themis_st.processing.process import *
-from themis_st.processing.style import *
+from themis_st.processing.process import (
+    ElectionResults,
+    get_nll_df,
+    get_voting,
+    get_prob_df,
+    get_differences,
+    get_voting_stats,
+)
 
 
 def select(runs: pd.DataFrame) -> tuple:
@@ -22,12 +29,11 @@ def select(runs: pd.DataFrame) -> tuple:
 
     if "task" not in st.session_state:
         st.session_state["task"] = task
-    else:
-        if task != st.session_state["task"]:
-            st.session_state["task"] = task
-            st.session_state.pop("choices", None)
-            st.session_state.pop("columns", None)
-            st.session_state.pop("menu_df", None)
+    elif task != st.session_state["task"]:
+        st.session_state["task"] = task
+        st.session_state.pop("choices", None)
+        st.session_state.pop("columns", None)
+        st.session_state.pop("menu_df", None)
 
     return model, task
 
@@ -195,128 +201,3 @@ norm_prob_section(norm_prob_df=norm_prob_df)
 diff = get_differences(df=norm_prob_df, columns=st.session_state.columns)
 diff_section(diff=diff)
 error_df, voting = metrics_section(norm_prob_df=norm_prob_df, diff=diff)
-
-import math
-
-electoral_votes = {
-    "Alabama": 9,
-    "Alaska": 3,
-    "Arizona": 11,
-    "Arkansas": 6,
-    "California": 54,
-    "Colorado": 10,
-    "Connecticut": 7,
-    "Delaware": 3,
-    "Florida": 30,
-    "Georgia": 16,
-    "Hawaii": 4,
-    "Idaho": 4,
-    "Illinois": 19,
-    "Indiana": 11,
-    "Iowa": 6,
-    "Kansas": 6,
-    "Kentucky": 8,
-    "Louisiana": 8,
-    "Maine": 4,
-    "Maryland": 10,
-    "Massachusetts": 11,
-    "Michigan": 15,
-    "Minnesota": 10,
-    "Mississippi": 6,
-    "Missouri": 10,
-    "Montana": 4,
-    "Nebraska": 5,
-    "Nevada": 6,
-    "New Hampshire": 4,
-    "New Jersey": 14,
-    "New Mexico": 5,
-    "New York": 28,
-    "North Carolina": 16,
-    "North Dakota": 3,
-    "Ohio": 17,
-    "Oklahoma": 7,
-    "Oregon": 8,
-    "Pennsylvania": 19,
-    "Rhode Island": 4,
-    "South Carolina": 9,
-    "South Dakota": 3,
-    "Tennessee": 11,
-    "Texas": 40,
-    "Utah": 6,
-    "Vermont": 3,
-    "Virginia": 13,
-    "Washington": 12,
-    "West Virginia": 4,
-    "Wisconsin": 10,
-    "Wyoming": 3,
-    "District of Columbia": 3,
-}
-
-st.divider()
-columns = st.session_state.columns + ["* sum", "* mean"]
-blue_err = norm_prob_df.drop("U.S.")["Democratic"].apply(lambda x: (voting.blue_pct - x).abs())
-blue_err = blue_err.loc[voting.pct_diff > 0]
-blue_err.columns = columns
-
-red_err = norm_prob_df.drop("U.S.")["Republican"].apply(lambda x: (voting.red_pct - x).abs())
-red_err = red_err.loc[voting.pct_diff < 0]
-red_err.columns = columns
-
-abs_error_df = pd.concat(objs=(red_err, blue_err)).sort_index()
-st.dataframe(abs_error_df["* mean"])
-st.divider()
-st.write("### nDCG@")
-
-abs_error_t = pd.Series(electoral_votes).to_frame(name="EV")
-abs_error_t["abs_error"] = abs_error_df["* mean"]
-abs_error_t = abs_error_t.sort_values(by="EV", ascending=False)
-abs_error_t.insert(0, "rank", range(1, len(abs_error_t) + 1))
-
-abs_error_t["abs_error_i"] = abs_error_t.apply(lambda i: i["abs_error"] / math.log2(i["rank"] + 1), axis=1)
-
-error_t = pd.Series(electoral_votes).to_frame(name="EV")
-error_t = error_t.sort_values(by="EV", ascending=False)
-error_t.insert(0, "rank", range(1, len(error_t) + 1))
-
-error_t["abs_error_mean"] = abs_error_df["* mean"]
-error_t = error_t.sort_values(by="EV", ascending=False)
-
-error_t["abs_error_mean_i"] = error_t.apply(lambda i: i["abs_error_mean"] / math.log2(i["rank"] + 1), axis=1)
-
-error_t["num_i"] = error_t.apply(lambda i: ((1 - i["abs_error_mean"])) / math.log2(i["rank"] + 1), axis=1)
-error_t["DCG"] = error_t["num_i"].cumsum()
-
-error_t["den_i"] = error_t["rank"].apply(lambda i: (1) / math.log2(i + 1))
-error_t["iDCG"] = error_t["den_i"].cumsum()
-
-idx = [f"NDCG@{i+1}" for i in range(51)]
-with st.expander("NDCG Calculations"):
-    st.dataframe(error_t)
-
-de = error_t["abs_error_mean"].cumsum()
-dce = error_t["abs_error_mean_i"].cumsum()
-ndcg = error_t["DCG"] / error_t["iDCG"]
-
-cum_sum_df = pd.DataFrame(data=zip(de, dce, ndcg), columns=["CE", "DCE", "nDCG"])
-
-with st.expander("Cumulative Sums"):
-    st.dataframe(cum_sum_df)
-
-import matplotlib.pyplot as plt
-
-fig, ax1 = plt.subplots()
-
-cum_sum_df[["CE", "DCE"]].plot(ax=ax1, legend=True)
-# ax1.set_ylabel("DE & DCE values", color="black")
-
-# Create secondary y-axis for nDCG
-ax2 = ax1.twinx()
-cum_sum_df["nDCG"].plot(ax=ax2, color="red", legend=True)
-ax2.legend(loc="lower right")
-# ax2.set_ylabel("nDCG (Rescaled)", color="red")
-
-_, cum_plot_col, _ = st.columns([0.2, 0.3, 0.2])
-with cum_plot_col:
-    st.pyplot(fig)
-
-st.dataframe(cum_sum_df.iloc[[50, 0, 1, 4, 9, 24]])

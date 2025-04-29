@@ -1,12 +1,13 @@
 import logging
 
 import hydra
-from dotenv import load_dotenv
-from hydra.core.hydra_config import DictConfig, OmegaConf
 
+from dotenv import load_dotenv
+from hydra.core.hydra_config import OmegaConf, DictConfig
+
+from themis.utils.tools import slug
 from themis.core.controller import Controller
 from themis.definitions.constants import CONFIG_PATH
-from themis.utils.tools import slug
 
 _ = load_dotenv()
 logger = logging.getLogger(__name__)

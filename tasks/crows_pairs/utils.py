@@ -1,5 +1,4 @@
 import datasets
-from lm_eval.api.task import ConfigurableTask
 
 
 def doc_to_choice(doc):

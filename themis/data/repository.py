@@ -1,10 +1,12 @@
 import os
-import os.path as osp
 import pickle
+import os.path as osp
+
+from typing import Any
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
+
 from pydantic_yaml import parse_yaml_file_as
 
 from themis.definitions.config import ExperimentConfig
@@ -25,7 +27,7 @@ class ExperimentDirectory:
 @dataclass
 class ExperimentOutput:
     root: str
-    _results: Dict[str, Any] = None
+    _results: dict[str, Any] = None
 
     def __post_init__(self):
         log_path = osp.join(self.root, ExperimentDirectory.log)
@@ -38,7 +40,7 @@ class ExperimentOutput:
         self.results_path = osp.join(self.root, ExperimentDirectory.job_return)
 
     @property
-    def results(self) -> Dict[str, Any]:
+    def results(self) -> dict[str, Any]:
         if self._results is None:
             with open(self.results_path, "rb") as handle:
                 self._results = pickle.load(handle)
@@ -49,11 +51,11 @@ class ExperimentOutput:
         return self.config.model
 
     @property
-    def tasks(self) -> List:
+    def tasks(self) -> list:
         return self.config.task
 
     @property
-    def task_configs(self) -> Dict:
+    def task_configs(self) -> dict:
         return self.results.get("configs", {})
 
     @property
@@ -78,7 +80,7 @@ class Repository:
 
         self.runs: pd.DataFrame = runs.explode("task").reset_index(drop=True)
 
-    def _read_experiments(self) -> List[ExperimentOutput]:
+    def _read_experiments(self) -> list[ExperimentOutput]:
         experiment_directory = ExperimentDirectory()
         runs = []
 
@@ -94,12 +96,12 @@ class Repository:
         eval_kwargs = config.eval_kwargs
         if any(runs):
             run_kwargs = runs.output.map(lambda x: x.config.eval_kwargs)
+            # ruff: noqa: C419
             return any([eval_kwargs == kwargs for kwargs in run_kwargs])
 
         return False
 
-    def load(self, model: Optional[Union[str, List]] = None, task: Optional[Union[str, List]] = None) -> pd.DataFrame:
-
+    def load(self, model: str | list | None = None, task: str | list | None = None) -> pd.DataFrame:
         runs = self.runs
 
         for key, value in {"model": model, "task": task}.items():

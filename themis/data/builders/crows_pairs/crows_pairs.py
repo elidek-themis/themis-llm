@@ -13,8 +13,8 @@
 # limitations under the License.
 """CrowS-Pairs: A Challenge Dataset for Measuring Social Biases in Masked Language Models"""
 
-import datasets
 import pandas as pd
+import datasets
 
 _CITATION = """\
 @inproceedings{nangia2020crows,
@@ -30,7 +30,7 @@ _CITATION = """\
     publisher = "Association for Computational Linguistics"
 }
 """
-
+# ruff: noqa: E501
 _DESCRIPTION = """\
 CrowS-Pairs, a challenge dataset for measuring the degree to which U.S. stereotypical biases present in the masked language models (MLMs).
 """
@@ -100,10 +100,13 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
         for key, row in enumerate(df.to_dict(orient="records")):
             # choices = (row["sent_more"], row["sent_less"])
             print(row["bias_type"])
-            yield key, {
-                "sent_more": row["sent_more"],
-                "sent_less": row["sent_less"],
-                "prompt": row["prompt"],
-                # "choices": choices,
-                "bias_type": row["bias_type"],
-            }
+            yield (
+                key,
+                {
+                    "sent_more": row["sent_more"],
+                    "sent_less": row["sent_less"],
+                    "prompt": row["prompt"],
+                    # "choices": choices,
+                    "bias_type": row["bias_type"],
+                },
+            )

@@ -1,8 +1,8 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
-from omegaconf import MISSING
-from pydantic import BaseModel, Field, field_validator
 from rich import print as rich_print
+from pydantic import Field, BaseModel, field_validator
+from omegaconf import MISSING
 from rich.panel import Panel
 from rich.pretty import Pretty
 
@@ -21,23 +21,23 @@ class GenerationArguments(BaseModel, frozen=True):
 
 
 class EvalArguments(BaseModel, frozen=True):
-    apply_chat_template: Optional[bool] = Field(default=False)
-    limit: Optional[Union[float, int]] = Field(default=None)
-    bootstrap_iters: Optional[int] = Field(default=0, ge=0)
+    apply_chat_template: bool | None = Field(default=False)
+    limit: float | int | None = Field(default=None)
+    bootstrap_iters: int | None = Field(default=0, ge=0)
     random_seed: int = Field(default=2025)
     numpy_random_seed: int = Field(default=2025)
     torch_random_seed: int = Field(default=2025)
     fewshot_random_seed: int = Field(default=2025)
-    gen_kwargs: Optional[GenerationArguments] = Field(default=None)
+    gen_kwargs: GenerationArguments | None = Field(default=None)
 
     @field_validator("apply_chat_template")
-    def validate_template(cls, value: Optional[bool]) -> bool:
+    def validate_template(cls, value: bool | None) -> bool:
         if value is None:
             return False
         return value
 
     @field_validator("limit")
-    def validate_limit(cls, value: Optional[Union[float, int]]) -> Optional[Union[float, int]]:
+    def validate_limit(cls, value: float | int | None) -> float | int | None:
         if isinstance(value, float):
             if not (0 < value < 1):
                 raise ValueError("If limit is a float, it must be between 0 and 1")
@@ -46,11 +46,11 @@ class EvalArguments(BaseModel, frozen=True):
 
 class ExperimentConfig(BaseModel, validate_assignment=True):
     model: str = Field(frozen=True)
-    task: Union[str, list] = Field(...)
+    task: str | list = Field(...)
     eval_kwargs: EvalArguments = Field(frozen=True, default_factory=EvalArguments)
 
     @field_validator("task")
-    def validate_task(cls, value: Union[str, list]) -> Union[str, list]:
+    def validate_task(cls, value: str | list) -> str | list:
         if value == MISSING:
             raise ValueError("Missing mandatory value: task")
         return value
@@ -58,7 +58,7 @@ class ExperimentConfig(BaseModel, validate_assignment=True):
 
 class InterfaceConfig(BaseModel, frozen=True):
     name: str = Field(...)
-    args: Dict[str, Any] = Field(default_factory=dict)
+    args: dict[str, Any] = Field(default_factory=dict)
 
 
 class Config(BaseModel, frozen=True):

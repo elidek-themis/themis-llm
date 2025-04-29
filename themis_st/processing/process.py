@@ -1,8 +1,10 @@
 import copy
+
 from math import exp
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import pandas as pd
+
 from lm_eval.loggers.utils import remove_none_pattern
 
 from themis.data.repository import ExperimentOutput
@@ -21,12 +23,12 @@ class ElectionResults:
         # self.choices = output.task_configs[task]["dataset_kwargs"]["choices"]
         # self.columns = output.task_configs[task]["dataset_kwargs"]["columns"]
 
-    def _sanitize_results(self, results: Dict[str, Any], task_names: List[str]) -> Dict[str, List]:
-        metrics = copy.deepcopy(results.get("results", dict()))
+    def _sanitize_results(self, results: dict[str, Any], task_names: list[str]) -> dict[str, list]:
+        metrics = copy.deepcopy(results.get("results", {}))
 
         tmp_metrics = copy.deepcopy(metrics)
         for task_name in task_names:
-            task_metrics = tmp_metrics.get(task_name, dict())
+            task_metrics = tmp_metrics.get(task_name, {})
             for metric_name, metric_value in task_metrics.items():
                 _metric_name, removed = remove_none_pattern(metric_name)
                 if isinstance(metric_value, str):
@@ -38,7 +40,7 @@ class ElectionResults:
         return metrics
 
 
-def get_nll_df(data: List, index: List, columns: List, use_cols: List):
+def get_nll_df(data: list, index: list, columns: list, use_cols: list):
     df = pd.DataFrame(data=data, index=index, columns=columns)
     df = df[use_cols]
     num_conts = int(len(df.columns) / 2)
@@ -50,7 +52,7 @@ def get_nll_df(data: List, index: List, columns: List, use_cols: List):
     return -pd.concat(objs=objs, keys=("Democratic", "Republican"), axis=1)
 
 
-def get_prob_df(nll_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def get_prob_df(nll_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Probabilities and normalized probabilities for every continuation"""
 
     prob_df = (-nll_df).map(lambda x: exp(x))  # exp(LogLikelihood)
@@ -77,7 +79,7 @@ def get_prob_df(nll_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     return prob_df, norm_prob_df[["Democratic", "Republican"]]
 
 
-def get_differences(df: pd.DataFrame, columns: List) -> pd.DataFrame:
+def get_differences(df: pd.DataFrame, columns: list) -> pd.DataFrame:
     cols = ["* sum", "* mean"]  # additional columns added by get_prob_df
     data = df["Democratic"].values - df["Republican"].values
     diff = pd.DataFrame(index=df.index, data=data, columns=columns + cols)
@@ -118,8 +120,7 @@ def get_abs_pct_difference(voting: pd.DataFrame, diff: pd.Series | pd.DataFrame)
     return diff.drop("U.S.").apply(lambda x: x.sub(voting.pct_diff).abs())
 
 
-def get_relative_error(norm_prob_df: pd.DataFrame, voting: pd.DataFrame, columns: List) -> pd.DataFrame:
-
+def get_relative_error(norm_prob_df: pd.DataFrame, voting: pd.DataFrame, columns: list) -> pd.DataFrame:
     # .drop(["D_sum", "D_mean"], axis=1).\
     blue_err = norm_prob_df.drop("U.S.")["Democratic"].apply(
         lambda x: x.sub(voting.blue_pct).abs().div(voting.blue_pct)
@@ -155,9 +156,8 @@ def get_counts(diff: pd.DataFrame, agreement: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_voting_stats(
-    voting: pd.DataFrame, norm_prob_df: pd.DataFrame, diff: pd.DataFrame, columns: List, round: int = 4
+    voting: pd.DataFrame, norm_prob_df: pd.DataFrame, diff: pd.DataFrame, columns: list, round: int = 4
 ) -> pd.DataFrame:
-
     agreement = get_agreement(voting=voting, diff=diff)
 
     us_prompts = diff.loc["U.S."].drop(["std", "se"]).to_frame("U.S. prompt").T

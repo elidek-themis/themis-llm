@@ -1,15 +1,15 @@
 import logging
-import os.path as osp
 
 import click
-from dotenv import load_dotenv
-from hydra.core.hydra_config import DictConfig, OmegaConf
-from lm_eval.tasks import TaskManager
 
+from dotenv import load_dotenv
+from lm_eval.tasks import TaskManager
+from hydra.core.hydra_config import OmegaConf
+
+from themis.utils.tools import slug, recompose_config
 from themis.data.repository import Repository
 from themis.definitions.config import Config, table_print
-from themis.definitions.constants import CONFIG_PATH, TASK_PATH
-from themis.utils.tools import recompose_config, slug
+from themis.definitions.constants import TASK_PATH, CONFIG_PATH
 
 _ = load_dotenv()
 logger = logging.getLogger(__name__)
