@@ -1,13 +1,16 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
 data/logs
 data/experiments
 data/raw
 data/processed
 notebooks/
+
+.vscode
+.ruff_cache
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
 # C extensions
 *.so
@@ -135,17 +138,14 @@ dmypy.json
 .pyre/
 
 # local files
-
 .idea/
 cover/
 typings/
 
 # devops
-
 infra/outputs/
 *.env
 *_.yml
 
 # scripts
-
 client_example.py

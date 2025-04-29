@@ -1,17 +1,20 @@
 default_stages:
 - pre-commit
-exclude: node_modules|.git|.tox
+exclude: .git|README.md|poetry.lock|.csv|.ipynb
 fail_fast: true
 repos:
--   hooks:
+# Detect secrets
+-   repo: https://github.com/Yelp/detect-secrets.git
+    rev: v1.5.0
+    hooks:
     -   id: detect-secrets
         args:
         - --baseline
         - .pre-commit/.secrets.baseline
-        exclude: (config/settings/test.py|/static|.html|local|README.md|poetry.lock|.csv|.ipynb)
-    repo: https://github.com/Yelp/detect-secrets.git
-    rev: v1.2.0
--   hooks:
+# Pre-commit hooks
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
     -   id: check-merge-conflict
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -19,45 +22,19 @@ repos:
         files: \.(json)$
     -   id: check-toml
         files: \.(toml)$
-    # -   id: check-yaml
-    #     files: \.(yaml)$
-    -   id: fix-encoding-pragma
+    -   id: check-yaml
+        files: \.(yaml)$
         args:
-        - --remove
-    repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
--   hooks:
-    -   id: isort
-        entry: isort
-        args: ["--profile", "black"]
-    repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.1
--   hooks:
-    -   exclude: (/settings/)
-        id: black
-        args: ["--line-length", "120"]
-        require_serial: true
+        - --unsafe  # allow !function tag
+# Ruff
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.7
+    hooks:
+      - id: ruff
+        # args: ["--fix"]
         types:
         - python
-    repo: https://github.com/ambv/black
-    rev: 22.3.0
--   hooks:
-    -   args:
-        - --config=.pre-commit/setup.cfg
-        id: flake8
-    repo: https://github.com/PyCQA/flake8.git
-    rev: 3.9.2
--   hooks:
-    -   entry: pylint --rcfile=.pre-commit/.pylintrc
-        exclude: (/settings/)
-        files: \.py$
-        id: system
-        language: system
-        name: PyLint
-    repo: local
--   hooks:
-    -   id: commitizen
-        stages:
-        - commit-msg
-    repo: https://github.com/commitizen-tools/commitizen
-    rev: v2.23.0
+      - id: ruff-format
+        # args: ["--fix"]
+        types:
+        - python

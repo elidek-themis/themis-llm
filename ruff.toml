@@ -1,0 +1,28 @@
+line-length = 120
+target-version = "py312"
+exclude = [".git", ".vscode"]
+
+[lint]
+select = [
+  "B",    # flake8-bugbear
+  "C",    # flake8-comprehensions
+  "E",    # pycodestyle
+  "F",    # Pyflakes
+  "W",    # pycodestyle warnings
+  "B9",   # flake8-bugbear
+  # "UP", # pyupgrade
+  # "G",  # logging
+  # "PL", # pylint
+]
+ignore = [
+  "E731", # lambda assignment
+  "F403", # import *
+  "W191", # indentation contains tabs
+]
+
+[lint.isort]
+known-first-party = ["themis", "themis_st"]
+
+[format]
+quote-style = "double"
+indent-style = "tab"
