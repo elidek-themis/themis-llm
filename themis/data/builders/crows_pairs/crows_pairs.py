@@ -99,7 +99,6 @@ class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
 
         for key, row in enumerate(df.to_dict(orient="records")):
             # choices = (row["sent_more"], row["sent_less"])
-            print(row["bias_type"])
             yield (
                 key,
                 {
