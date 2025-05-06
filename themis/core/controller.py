@@ -30,6 +30,6 @@ class Controller:
 
     def run_experiment_job(self) -> dict | None:
         inference.setup(interface=self.config.interface)  # initiliaze model
-        results = self.experiment.evaluate(lm=inference.lm)  # run evaluation
+        results = self.experiment.evaluate(lm=inference.backend)  # run evaluation
 
         return results
