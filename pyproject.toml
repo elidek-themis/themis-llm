@@ -30,6 +30,7 @@ dependencies = [
     "streamlit-code-editor>=0.1.22,<0.2",
     "st-pages>=1.0.1,<2",
     "ruff>=0.11.7",
+    "tinydb>=4.8.2",
 ]
 
 [dependency-groups]
