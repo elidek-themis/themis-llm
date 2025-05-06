@@ -34,6 +34,8 @@ class MyCallback(Callback):
             return_value = job_return.return_value  # can raise
             if return_value:  # check JobReturn.status maybe
                 self._save_results(config=config, results=return_value, output_dir=output_dir)
+            else:
+                self._rm_dir(output_dir)
         # log the raised Exception when the JobStatus is not COMPLETED
         except ExperimentExists as e:
             self.log.error(e, exc_info=True)
