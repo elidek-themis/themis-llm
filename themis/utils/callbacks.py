@@ -41,11 +41,12 @@ class MyCallback(Callback):
             self.log.error(e, exc_info=True)
             self._rm_dir(output_dir)
             return
-        except Exception:
+        except Exception as e:
             import traceback
 
             print(traceback.format_exc())
-            self.log.error(job_return.return_value, exc_info=True)
+
+            self.log.error(e, exc_info=True)
             self._rm_dir(output_dir)
         finally:
             job_return.status = JobStatus.COMPLETED

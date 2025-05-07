@@ -10,17 +10,20 @@ from lm_eval.api.group import ConfigurableGroup
 
 from themis.data.repository import Repository
 from themis.definitions.config import ExperimentConfig
+from themis.definitions.registry import register_eval
 from themis.definitions.constants import TASK_PATH
 from themis.definitions.exceptions import ExperimentExists
+from themis.core.evaluation.eval_base import Evaluation
 
 logger = logging.getLogger(__name__)
 
 
-class Experiment:
+@register_eval("lm_eval")
+class LMEval(Evaluation):
     def __init__(self, config: ExperimentConfig) -> None:
         self.config = config
 
-    def init_task(self, repo: Repository) -> None:
+    def validate(self, repo: Repository) -> None:
         logger.info("Initializing tasks directory")
         self.task_manager = TaskManager(include_path=TASK_PATH, include_defaults=False)
         task_dict = get_task_dict(self.config.task, task_manager=self.task_manager)

@@ -1,8 +1,8 @@
 # @package: _global_
 
+name: lm_eval
 task: "${oc.select: task, ???}"
 model: "${oc.select: model, ???}"
-type: multiple_choice
 eval_kwargs:
   apply_chat_template: "${oc.select: apply_chat_template}"
   limit: "${oc.select: limit}"

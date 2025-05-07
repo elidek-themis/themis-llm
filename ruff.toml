@@ -21,12 +21,11 @@ ignore = [
   "E731", # lambda-assignment
   "B905", # zip-without-explicit-strict
   "PLR0913", # too-many-arguments
+  "PLC0414" # useless-import-alias
 ]
 
 [lint.per-file-ignores]
 "themis_st/**/*.py" = ["PLR2004"] # magic-value-comparison
-"themis/__init__.py" = ["PLC0414"] # useless-import-alias
-"themis/definitions/__init__.py" = ["PLC0414"] # useless-import-alias
 
 [lint.isort]
 from-first = false

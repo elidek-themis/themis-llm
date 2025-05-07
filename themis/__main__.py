@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 @hydra.main(version_base=None, config_path=CONFIG_PATH, config_name="config")
 def experiment_entry(config: DictConfig) -> dict:
     controller = Controller(config=config)
-    return controller.run_experiment_job()
+    controller.validate(verbose=True)
+    return controller.run_experiment()
 
 
 if __name__ == "__main__":

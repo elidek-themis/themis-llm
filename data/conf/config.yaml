@@ -1,7 +1,7 @@
 defaults:
   - settings
   - interface: vllm
-  - experiment: multiple_choice
+  - experiment: lm_eval
   - _self_
 
 task:

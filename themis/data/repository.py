@@ -106,7 +106,6 @@ class Repository:
     def _get_experiments(self) -> list[dict]:
         experiments = []
         for root, _, files in os.walk(EXPERIMENTS_PATH):
-            print(files)
             if files == ExperimentDirectory.files:
                 log, config, results = self._parse_experiment_directory(path=root)
 
