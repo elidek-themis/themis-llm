@@ -55,11 +55,10 @@ class __Inference:
     @classmethod
     def collect(cls) -> None:
         logger.info("Deleting inference instance")
-        del cls.backend
         cls.backend = None
+        cls.config = None
         gc.collect()
         torch.cuda.empty_cache()
-        cls.config = None
         logger.info("Inference instance deleted")
 
 
