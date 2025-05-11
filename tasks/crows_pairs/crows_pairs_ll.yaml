@@ -1,6 +1,6 @@
 task: crows_pairs_ll
-dataset_path: themis/data/builders/crows_pairs
-# dataset_path: /home/ch_karanikolopoulos/Desktop/themis-llm/themis/data/builders/crows_pairs/crows_pairs.py
+# dataset_path: themis/data/builders/crows_pairs
+dataset_path: /home/ch_karanikolopoulos/Desktop/themis-llm/themis/data/builders/crows_pairs/crows_pairs.py
 dataset_kwargs:
   trust_remote_code: true
 test_split: test

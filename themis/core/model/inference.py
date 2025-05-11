@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 BACKEND_REGISTRY = {
     "lm_eval_hf": HFLM,
+    "lm_eval_vllm": VLLM,
 }
 
 backends = list(BACKEND_REGISTRY.keys())
@@ -52,29 +53,14 @@ class __Inference:
         cls.config = interface
 
     @classmethod
-    def collect(cls):
+    def collect(cls) -> None:
+        logger.info("Deleting inference instance")
         del cls.backend
         cls.backend = None
-        cls.config = None
-
-
-@register_backend("lm_eval_vllm")
-class ThVLLM(VLLM):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.is_chat = True if self.tokenizer.chat_template else False
-
-    def apply_chat_template(self, chat_history):
-        return self.tokenizer.apply_chat_template(
-            conversation=chat_history, tokenize=False, continue_final_message=False
-        )
-
-    def __del__(self):
-        logger.info("Deleting VLLM instance")
-        super().__del__()
         gc.collect()
         torch.cuda.empty_cache()
-        logger.info("VLLM instance deleted")
+        cls.config = None
+        logger.info("Inference instance deleted")
 
 
 inference = __Inference()
