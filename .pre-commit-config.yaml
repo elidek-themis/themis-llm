@@ -8,6 +8,7 @@ repos:
     rev: v1.5.0
     hooks:
     -   id: detect-secrets
+        name: detect secrets
         args:
         - --baseline
         - .pre-commit/.secrets.baseline
@@ -28,13 +29,23 @@ repos:
         - --unsafe  # allow !function tag
 # Ruff
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.7
+    rev: v0.11.9
     hooks:
       - id: ruff
+        name: ruff linter
         args: ["--diff"]
         types:
         - python
       - id: ruff-format
-        args: ["--diff"]
-        types:
-        - python
+        name: ruff formatter
+        args: ["--check", "--diff"]
+        types: [python]
+# MyPy
+-   repo: local
+    hooks:
+    - id: mypy
+      name: mypy (local)
+      entry: bash ./tests/mypy.sh
+      language: system
+      types: [python]
+      pass_filenames: false
