@@ -5,17 +5,11 @@ defaults:
   - _self_
 
 task:
-  - residency_poll_1_1
-  - residency_poll_1_2
-  - residency_poll_1_3
-  - residency_poll_2_1
-  - residency_poll_2_2
-  - residency_poll_2_3
-  - residency_poll_3_1
-  - residency_poll_3_2
-  - residency_poll_3_3
+  - residency_poll_1
+  - residency_poll_2
+  - residency_poll_3
 
-# model: meta-llama/Llama-3.1-8B
+model: meta-llama/Llama-3.1-8B
 # model: meta-llama/Llama-3.1-8B-Instruct
 
 # model: meta-llama/Llama-3.2-3B
@@ -27,5 +21,5 @@ task:
 # model: mistralai/Mistral-7B-v0.3
 # model: mistralai/Mistral-7B-Instruct-v0.3
 
-model: tiiuae/falcon-7b
+# model: tiiuae/falcon-7b
 # model: tiiuae/falcon-7b-instruct

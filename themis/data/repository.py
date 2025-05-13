@@ -9,6 +9,7 @@ import pandas as pd
 import evaluate
 
 from tinydb import Query, TinyDB
+from tinydb.table import Document
 from pydantic_yaml import parse_yaml_file_as
 from huggingface_hub import scan_cache_dir
 from tinydb.storages import MemoryStorage
@@ -40,7 +41,7 @@ class ExperimentOutput:
         return self.config.model
 
     @property
-    def tasks(self) -> list:
+    def tasks(self) -> str | list[str]:
         return self.config.task
 
     @property
@@ -52,15 +53,15 @@ class ExperimentOutput:
         _, alias = self.root.rsplit("/", 1)
         return alias
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.alias
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.alias
 
 
 class Repository:
-    def __init__(self):
+    def __init__(self) -> None:
         # TODO: persistent storage requires
         # to serialize the pickled results
         self.db = TinyDB(storage=MemoryStorage)
@@ -134,7 +135,7 @@ class Repository:
 
         return log, config, results
 
-    def load(self, config: ExperimentConfig) -> list[dict]:
+    def load(self, config: ExperimentConfig) -> list[Document]:
         Experiment = Query()
         experiment_table = self.db.table("experiments")
 

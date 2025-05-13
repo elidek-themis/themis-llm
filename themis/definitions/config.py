@@ -47,7 +47,7 @@ class EvalArguments(BaseModel, frozen=True):
 class ExperimentConfig(BaseModel, validate_assignment=True):
     name: str = Field(...)
     model: str = Field(frozen=True)
-    task: str | list = Field(...)
+    task: str | list[str] = Field(...)
     eval_kwargs: EvalArguments = Field(frozen=True, default_factory=EvalArguments)
 
     @field_validator("task")

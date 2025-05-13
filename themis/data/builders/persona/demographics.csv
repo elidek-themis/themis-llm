@@ -1,31 +1,31 @@
-demographic, group, persona
-gender, male, male U.S. citizen
-gender, female, female U.S. citizen
-sex_orient, straight, straight person and U.S. citizen
-sex_orient, LGBTQ+, member of the LGBTQ+ community and U.S. citizen
-age, 18-29, U.S. citizen in the age group 18-29
-age, 30-44, U.S. citizen in the age group 30-44
-age, 45-64, U.S. citizen in the age group 45-64
-age, 65+, U.S. citizen in the age group 65+
-edu, with, U.S. citizen with higher education (college degree or higher)
-edu, without, U.S. citizen without higher education (college degree or higher)
-income, ">$50,000", "U.S. citizen, with income below $50,000"
-income, "$50,000-$100,000", "U.S. citizen, with income between $50,000 and $100,000"
-income, "<$50,000", "U.S. citizen, with income above $50,000"
-location, urban, "U.S. citizen, living in an urban area"
-location, sub-urban, "U.S. citizen, living in a sub-urban area"
-location, rural, "U.S. citizen, living in a rural area"
-religion, christian, christian U.S. citizen
-religion, muslim, muslim U.S. citizen
-religion, hindu, hindu U.S. citizen
-religion, jew, jew U.S. citizen
-religion, buddhist, buddhist U.S. citizen
-race, white, white U.S. citizen
-race, black, black U.S. citizen
-race, hispanic, hispanic U.S. citizen
-race, asian, asian U.S. citizen
-border-ethnicity, California, white U.S. citizen of California
-border-ethnicity, Arizona, white U.S. citizen of Arizona
-border-ethnicity, New Mexico, white U.S. citizen of New Mexico
-border-ethnicity, Texas, white U.S. citizen of Texas
-border-ethnicity, Luisiana, white U.S. citizen of Luisiana
+demographic     , group             , persona
+gender          , male              , male U.S. citizen
+gender          , female            , female U.S. citizen
+sex_orient      , straight          , straight person and U.S. citizen
+sex_orient      , LGBTQ+            , member of the LGBTQ+ community and U.S. citizen
+age             , 18-29             , U.S. citizen in the age group 18-29
+age             , 30-44             , U.S. citizen in the age group 30-44
+age             , 45-64             , U.S. citizen in the age group 45-64
+age             , 65+               , U.S. citizen in the age group 65+
+edu             , with              , U.S. citizen with higher education (college degree or higher)
+edu             , without           , U.S. citizen without higher education (college degree or higher)
+income          , ">$50,000"        , "U.S. citizen, with income below $50,000"
+income          , "$50,000-$100,000", "U.S. citizen, with income between $50,000 and $100,000"
+income          , "<$50,000"        , "U.S. citizen, with income above $50,000"
+location        , urban             , "U.S. citizen, living in an urban area"
+location        , sub-urban         , "U.S. citizen, living in a sub-urban area"
+location        , rural             , "U.S. citizen, living in a rural area"
+religion        , christian         , christian U.S. citizen
+religion        , muslim            , muslim U.S. citizen
+religion        , hindu             , hindu U.S. citizen
+religion        , jew               , jew U.S. citizen
+religion        , buddhist          , buddhist U.S. citizen
+race            , white             , white U.S. citizen
+race            , black             , black U.S. citizen
+race            , hispanic          , hispanic U.S. citizen
+race            , asian             , asian U.S. citizen
+border-ethnicity, California        , white U.S. citizen of California
+border-ethnicity, Arizona           , white U.S. citizen of Arizona
+border-ethnicity, New Mexico        , white U.S. citizen of New Mexico
+border-ethnicity, Texas             , white U.S. citizen of Texas
+border-ethnicity, Luisiana          , white U.S. citizen of Luisiana

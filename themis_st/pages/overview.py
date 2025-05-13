@@ -4,7 +4,7 @@ import os.path as osp
 import pandas as pd
 import streamlit as st
 
-from themis.data.repository import Repository, ExperimentOutput
+from themis.data.repository import ExperimentOutput
 from themis_st.processing.plot import catplot
 from themis_st.processing.style import nll_styler, diff_styler, prob_styler, stats_styler, norm_prob_styler
 from themis.definitions.constants import RAW_PATH
@@ -23,7 +23,8 @@ def select(runs: pd.DataFrame) -> tuple:
         "Select model",
         runs.model.unique(),
     )
-    model_runs = repo.load(model=model)
+    model_runs = runs[runs.model == model]
+    # model_runs = repo.load(model=model)
 
     task = st.selectbox("Select task", model_runs.task.sort_values())
 
@@ -161,30 +162,26 @@ def metrics_section(norm_prob_df: pd.DataFrame, diff: pd.DataFrame) -> None:
 
     tab20, tab24 = st.tabs(["2020", "2024"])
     with tab20:
-        error_df, stats = get_voting_stats(
+        stats = get_voting_stats(
             voting=voting_20, norm_prob_df=norm_prob_df, diff=diff, columns=st.session_state.columns
         )
         st.dataframe(stats_styler(stats))
     with tab24:
-        error_df, stats = get_voting_stats(
+        stats = get_voting_stats(
             voting=voting_24, norm_prob_df=norm_prob_df, diff=diff, columns=st.session_state.columns
         )
         st.dataframe(stats_styler(stats))
 
-    return (
-        error_df,
-        voting_24,
-    )
-
 
 st.title("LLM Election Polls")
-repo = Repository()
-runs = repo.runs
+runs = st.session_state.runs
+runs = runs[runs.task.str.contains("residency")]
 
 with st.sidebar:
     st.write("Repository")
     model, task = select(runs=runs)
-run = repo.load(model=model, task=task)
+run = runs[(runs.model == model) & (runs.task == task)]
+# run = repo.load(model=model, task=task)
 
 output = run.output.item()
 task_summary(output=output, task=task)
@@ -200,4 +197,4 @@ prob_section(prob_df=prob_df, key="prob_acc")
 norm_prob_section(norm_prob_df=norm_prob_df)
 diff = get_differences(df=norm_prob_df, columns=st.session_state.columns)
 diff_section(diff=diff)
-error_df, voting = metrics_section(norm_prob_df=norm_prob_df, diff=diff)
+metrics_section(norm_prob_df=norm_prob_df, diff=diff)

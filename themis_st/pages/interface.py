@@ -13,7 +13,7 @@ from streamlit.logger import get_logger
 from vllm.engine.arg_utils import EngineArgs
 
 from themis_st.processing.model import Connection
-from themis_st.processing.utils import VLLMArgs, get_model_hub
+from themis_st.processing.utils import VLLMArgs
 
 TEMPLATE_CFG = {
     # "model": "facebook/opt-125m",
@@ -26,7 +26,8 @@ TEMPLATE_CFG = {
     "seed": 2025,
 }
 
-MODELS = get_model_hub()["model"].to_list()
+MODELS = st.session_state.repo.db.table("model_hub")
+MODELS = [m["model"] for m in MODELS.all()]
 MODELS = ["facebook/opt-125m"] if not MODELS else MODELS
 
 st_logger = get_logger(__name__)
@@ -42,26 +43,26 @@ if "con" not in st.session_state:
     st.session_state.con = None
 
 
-def validate_config(config):
+def validate_config(config: str) -> None:
     msg = st.toast("Validating config")
     time.sleep(0.5)
     if not config:
         st.toast("Save 💾")
         return
     try:
-        config = literal_eval(config)
+        config_dict = literal_eval(config)
         msg.toast("EngineArgs validations..")
-        EngineArgs(**{"model": st.session_state.selected_model, **config})
+        EngineArgs(**{"model": st.session_state.selected_model, **config_dict})
         time.sleep(0.5)
         msg.toast("EngineArgs validations ✔️")
         time.sleep(0.5)
         msg.toast("Pydantic validations ..")
-        VLLMArgs(**{"model": st.session_state.selected_model, **config})
+        VLLMArgs(**{"model": st.session_state.selected_model, **config_dict})
         time.sleep(0.5)
         msg.toast("Pydantic validations ✔️")
         time.sleep(0.5)
         msg.toast("Valid config ✔️")
-        st.session_state.vllm_config = config
+        st.session_state.vllm_config = config_dict
     except SyntaxError as e:
         st.toast(f":red[{e.msg} line{e.lineno}]")
     except ValidationError as e:
@@ -72,7 +73,7 @@ def validate_config(config):
         time.sleep(0.5)
 
 
-def nvidia_smi():
+def nvidia_smi() -> str:
     gpu_usage = subprocess.getoutput("nvidia-smi")
     return gpu_usage
     # gpu_usage = gpu_usage.split("\n")
@@ -124,7 +125,7 @@ with input_col:
         uploaded_file = st.file_uploader("Choose config")
 
 
-def connect():
+def connect() -> None:
     url = st.session_state.url
     url_hp = url + "/health"
 

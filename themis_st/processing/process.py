@@ -23,7 +23,7 @@ class ElectionResults:
         # self.choices = output.task_configs[task]["dataset_kwargs"]["choices"]
         # self.columns = output.task_configs[task]["dataset_kwargs"]["columns"]
 
-    def _sanitize_results(self, results: dict[str, Any], task_names: list[str]) -> dict[str, list]:
+    def _sanitize_results(self, results: dict[str, Any], task_names: str | list[str]) -> dict[str, dict[str, Any]]:
         metrics = copy.deepcopy(results.get("results", {}))
 
         tmp_metrics = copy.deepcopy(metrics)
@@ -40,7 +40,7 @@ class ElectionResults:
         return metrics
 
 
-def get_nll_df(data: list, index: list, columns: list, use_cols: list):
+def get_nll_df(data: list, index: list, columns: list, use_cols: list) -> pd.DataFrame:
     df = pd.DataFrame(data=data, index=index, columns=columns)
     df = df[use_cols]
     num_conts = int(len(df.columns) / 2)
@@ -179,4 +179,4 @@ def get_voting_stats(
         error_df_mean.round(round),
     )
 
-    return error_df, pd.concat(objs)
+    return pd.concat(objs)

@@ -1,5 +1,7 @@
 import logging
 
+from typing import Any
+
 import hydra
 
 from dotenv import load_dotenv
@@ -14,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 @hydra.main(version_base=None, config_path=CONFIG_PATH, config_name="config")
-def experiment_entry(config: DictConfig) -> dict:
+def experiment_entry(config: DictConfig) -> dict[str, Any]:
     controller = Controller(config=config)
-    controller.validate(verbose=True)
+    controller.validate()
     return controller.run_experiment()
 
 

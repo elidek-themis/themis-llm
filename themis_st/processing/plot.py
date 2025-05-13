@@ -2,7 +2,7 @@ import pandas as pd
 import seaborn as sns
 
 
-def catplot(df: pd.DataFrame, title: str, kind: str):
+def catplot(df: pd.DataFrame, title: str, kind: str) -> sns.FacetGrid:
     df = df.melt(value_name="$P_{diff}$")
     df.rename(columns={"variable": "completion"}, inplace=True)
 
@@ -25,7 +25,7 @@ def catplot(df: pd.DataFrame, title: str, kind: str):
     return g
 
 
-def kdeplot(df: pd.DataFrame, title: str):
+def kdeplot(df: pd.DataFrame, title: str) -> sns.FacetGrid:
     ax = sns.kdeplot(df, fill=True, alpha=0.2)
     ax = sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 0.5))
 

@@ -1,5 +1,7 @@
 import logging
 
+from typing import Any
+
 from hydra.core.hydra_config import OmegaConf, DictConfig
 
 import themis.core.evaluation  # noqa: F401
@@ -14,29 +16,27 @@ logger = logging.getLogger(__name__)
 
 class Controller:
     def __init__(self, config: DictConfig) -> None:
-        self.config = config
+        self.config = self._validate_config(config=config, verbose=True)
         self.repo = Repository()
 
-    def validate(self, verbose: bool = True) -> None:
-        self.config = self._validate_config(config=self.config, verbose=verbose)
-
+    def validate(self) -> None:
         experiment_config = self.config.experiment
         eval_cls = get_eval(experiment_config.name)
         self.experiment = eval_cls(config=experiment_config)
         self.experiment.validate(repo=self.repo)
 
     def _validate_config(self, config: DictConfig, verbose: bool = False) -> Config:
-        config = OmegaConf.to_container(cfg=config, resolve=True)  # to dict while resolving
-        config = Config(**config)  # pass config for validations
+        config_dict = OmegaConf.to_container(config, resolve=True)  # to dict while resolving
+        config_val = Config(**config_dict)  # pass config for validations
 
         logger.info("Valid input configuration")
         if verbose:
-            table_print(config)
+            table_print(config_val)
 
-        return config
+        return config_val
 
-    def run_experiment(self) -> dict | None:
+    def run_experiment(self) -> dict[str, Any]:
         inference.setup(interface=self.config.interface)  # initiliaze model
-        results = self.experiment.evaluate(lm=inference.lm)  # run evaluation
+        results = self.experiment.evaluate(lm=inference.backend)  # run evaluation
 
         return results

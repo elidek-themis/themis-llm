@@ -7,6 +7,8 @@ import lm_eval
 from lm_eval.tasks import TaskManager, get_task_dict
 from lm_eval.api.task import ConfigurableTask
 from lm_eval.api.group import ConfigurableGroup
+from lm_eval.api.model import TemplateLM
+from lm_eval.api.registry import register_aggregation
 
 from themis.data.repository import Repository
 from themis.definitions.config import ExperimentConfig
@@ -28,7 +30,7 @@ class LMEval(Evaluation):
         self.task_manager = TaskManager(include_path=TASK_PATH, include_defaults=False)
         task_dict = get_task_dict(self.config.task, task_manager=self.task_manager)
         task_dict = self._sanitize_task_dict(task_dict=task_dict, repo=repo)
-        self.config.task, self.tasks = zip(*task_dict.items())
+        self.config.task, self.tasks = zip(*task_dict.items())  # type: ignore[assignment]
 
     def _sanitize_task_dict(self, task_dict: dict[Any, Any], repo: Repository) -> dict[str, ConfigurableTask]:
         task = next(iter(task_dict))  # first entry of task_dict
@@ -50,7 +52,7 @@ class LMEval(Evaluation):
 
         return task_dict
 
-    def evaluate(self, lm):
+    def evaluate(self, lm: TemplateLM) -> dict[str, Any]:
         logger.info("Running evaluation task")
 
         results = lm_eval.simple_evaluate(
@@ -59,3 +61,9 @@ class LMEval(Evaluation):
         # update with the (modified) experiment config
         results["config"] = self.config
         return results
+
+
+# custom metrics/aggregations
+@register_aggregation("pass")
+def pass_agg(arr):  # type: ignore[no-untyped-def]
+    return arr

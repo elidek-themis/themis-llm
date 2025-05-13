@@ -51,7 +51,7 @@ class MyCallback(Callback):
         finally:
             job_return.status = JobStatus.COMPLETED
 
-    def _rm_dir(self, output_dir: Path):
+    def _rm_dir(self, output_dir: Path) -> None:
         self.log.info(f"Deleting empty dir {output_dir}")
         shutil.rmtree(output_dir)
 

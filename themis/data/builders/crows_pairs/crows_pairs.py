@@ -11,6 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# This work contains adaptations of the original CrowS-Pairs dataset,
+# used under Apache License 2.0. Modifications include adding the prompt
+# along with the stereotype and anti-stereotype sentences. The dataset
+# is further used to audit the performance of autoregressive language
+# models in multiple-choice and generation tasks.
 """CrowS-Pairs: A Challenge Dataset for Measuring Social Biases in Masked Language Models"""
 
 import pandas as pd
@@ -34,7 +40,6 @@ _CITATION = """\
 _DESCRIPTION = """\
 CrowS-Pairs, a challenge dataset for measuring the degree to which U.S. stereotypical biases present in the masked language models (MLMs).
 """
-
 
 _URLS = [
     "https://raw.githubusercontent.com/nyu-mll/crows-pairs/master/data/crows_pairs_anonymized.csv",

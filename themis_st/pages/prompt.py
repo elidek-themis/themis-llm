@@ -31,7 +31,7 @@ with st.sidebar:
             st.write("No connection")
 
 
-def submit():
+def submit() -> None:
     if st.session_state.prompt:
         con = st.session_state.con
         st.session_state.completion = con.client.completions.create(
@@ -47,8 +47,8 @@ def submit():
         time.sleep(0.75)
 
 
-def get_hex_color(value):
-    rgba = plt.cm.RdYlGn(value)  # Get RGBA
+def get_hex_color(value: float) -> str:
+    rgba = plt.get_cmap("RdYlGn")(value)
     return mcolors.rgb2hex(rgba)  # Convert to HEX (e.g., '#a6d96a')
 
 
@@ -66,11 +66,12 @@ if st.session_state.con:
         for prompt in prompt_logprobs[1:]:
             token_id = next(iter(prompt))
             encoded_prompt.append({"token": token_id} | prompt[token_id])
-        encoded_prompt = pd.DataFrame(encoded_prompt)
-        encoded_prompt["probability"] = encoded_prompt.logprob.apply(lambda x: math.exp(x))
+
+        encoded_prompt_df = pd.DataFrame(encoded_prompt)
+        encoded_prompt_df["probability"] = encoded_prompt_df.logprob.apply(lambda x: math.exp(x))
 
         annotations = []
-        for _, row in encoded_prompt.iterrows():
+        for _, row in encoded_prompt_df.iterrows():
             token = row.decoded_token
             prob = row.probability
             color = get_hex_color(prob)

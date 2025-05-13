@@ -1,6 +1,5 @@
 name: lm_eval_vllm
 args:
   pretrained: "${oc.select: ...model, ???}"
-  # max_gen_tokens: null
-  gpu_memory_utilization: 0.9
+  gpu_memory_utilization: 0.8
   seed: "${oc.select: ...seed, ???}"

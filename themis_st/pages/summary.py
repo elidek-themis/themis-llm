@@ -3,7 +3,6 @@ import os.path as osp
 import pandas as pd
 import streamlit as st
 
-from themis.data.repository import Repository
 from themis_st.processing.plot import catplot
 from themis_st.processing.style import stats_styler
 from themis.definitions.constants import RAW_PATH
@@ -18,14 +17,13 @@ from themis_st.processing.process import (
 
 voting_20 = get_voting(voting_path=osp.join(RAW_PATH, "voting-2020.xlsx"))
 voting_24 = get_voting(voting_path=osp.join(RAW_PATH, "voting-2024.xlsx"))
-repo = Repository()
-runs = repo.runs
+runs = st.session_state.runs
 
 model = st.selectbox(
     "Select model",
     runs.model.unique(),
 )
-model_runs = repo.load(model=model)
+model_runs = runs[runs.model == model]
 
 tasks = st.multiselect("Select tasks", model_runs.task.sort_values())
 
@@ -33,7 +31,8 @@ for task in tasks:
     # task_name = task.replace("_", " ").title()
     # st.divider()
     with st.expander(f"#### {task}"):
-        run = repo.load(model=model, task=task)
+        run = runs[(runs.model == model) & (runs.task == task)]
+        # run = repo.load(model=model, task=task)
         output = run.output.item()
 
         task_config = output.task_configs[task]

@@ -1,17 +1,24 @@
 import re
 import logging
 
+from typing import Any
+
 import hydra
 import coolname
 
 from yaml import FullLoader, load
+from omegaconf import OmegaConf
+from lm_eval.tasks import TaskManager
 from hydra.core.hydra_config import DictConfig
+
+from themis.definitions.config import Config, table_print
+from themis.definitions.constants import TASK_PATH, CONFIG_PATH
 
 logger = logging.getLogger(__name__)
 
 
 class CustomFormatter(logging.Formatter):
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         if "lm_eval" in record.pathname:
             module = "LM-Eval"
         elif "hydra" in record.pathname:
@@ -63,3 +70,20 @@ def format_size(num: int) -> str:
             return f"{num_f:3.1f}{unit}"
         num_f /= 1000.0
     return f"{num_f:.1f}Y"
+
+
+def read_config() -> None:
+    OmegaConf.register_new_resolver("slug", slug)
+
+    config_raw = recompose_config(config_dir=CONFIG_PATH)
+    OmegaConf.resolve(config_raw)  # interpolations
+    config_dict: dict[str, Any] = OmegaConf.to_container(cfg=config_raw)  # type: ignore # to dict
+    config = Config(**config_dict)  # pass config for validations
+    table_print(config)
+
+    print(config.experiment)
+
+
+def list_tasks() -> None:
+    task_manager = TaskManager(include_path=TASK_PATH, include_defaults=False)
+    print(task_manager.list_all_tasks())

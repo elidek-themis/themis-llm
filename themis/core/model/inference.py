@@ -1,45 +1,21 @@
 import gc
 import logging
 
-from typing import Any
-
 import torch
 
-from lm_eval.models.huggingface import HFLM
-from lm_eval.models.vllm_causallms import VLLM
+from lm_eval.api.model import TemplateLM
 
 from themis.definitions.config import InterfaceConfig
+from themis.definitions.registry import get_backend
 
-__all__ = ["inference", "backends"]
+__all__ = ["inference"]
 
 logger = logging.getLogger(__name__)
 
-BACKEND_REGISTRY = {
-    "lm_eval_hf": HFLM,
-    "lm_eval_vllm": VLLM,
-}
-
-backends = list(BACKEND_REGISTRY.keys())
-
-
-def register_backend(name):
-    def decorate(cls):
-        BACKEND_REGISTRY[name] = cls
-        return cls
-
-    return decorate
-
-
-def get_model(model_name):
-    try:
-        return BACKEND_REGISTRY[model_name]
-    except KeyError as e:
-        raise ValueError(f"Supported backend names: {', '.join(BACKEND_REGISTRY.keys())}") from e
-
 
 class __Inference:
-    backend: type[Any] = None
-    config: InterfaceConfig = None
+    backend: TemplateLM | None = None
+    config: InterfaceConfig | None = None
 
     @classmethod
     def setup(cls, interface: InterfaceConfig) -> None:
@@ -48,7 +24,7 @@ class __Inference:
             logger.info(interface)
             return
 
-        backend_class = get_model(interface.name)
+        backend_class = get_backend(interface.name)
         cls.backend = backend_class(**interface.args)
         cls.config = interface
 

@@ -1,5 +1,6 @@
 import re
-import ast
+
+from typing import Any
 
 import pandas as pd
 import datasets
@@ -64,18 +65,20 @@ _STATES = [
     "Wyoming",
 ]
 
+_DEMOGRAPHICS_PATH = "themis/data/persona/demographics.csv"
+
 
 class PersonaConfig(datasets.BuilderConfig):
     def __init__(
         self,
-        template: str | list[dict[str, str]],
+        template: str,
         sub: dict[str, str] | None = None,
-        choices: list[str] = None,
-        columns: list[str] = None,
-        **kwargs,
+        choices: dict[str, list] | None = None,
+        columns: list[str] | None = None,
+        **kwargs: Any,
     ):
         if choices is None:
-            choices = []
+            choices = {}
         if columns is None:
             columns = []
 
@@ -108,33 +111,28 @@ class Persona(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "residency"
 
-    def __init__(self, **config) -> None:
+    def __init__(self, **config: PersonaConfig):
         super().__init__(**config)
-        template = self.config.template
-
-        if isinstance(template, str):
-            self.is_chat = False
-        elif isinstance(template, list):
-            self.is_chat = True
-        else:
-            raise ValueError("Template should be a string or a list of dictionaries")
+        self.template = self.config.template
+        assert "{persona}" in self.template, "template should include {persona} in brackets"
 
         self.choices = self.config.choices
         self.columns = self.config.columns
-
-        self.template = str(template)
-        assert "{persona}" in self.template, "template should include {persona} in brackets"
-
         self.sub = self.config.sub
 
     def _info(self):
-        chat = [datasets.Features({"role": datasets.Value("string"), "content": datasets.Value("string")})]
+        choices = datasets.Features(
+            {
+                "pro": datasets.Sequence(datasets.Value("string")),
+                "contra": datasets.Sequence(datasets.Value("string")),
+            }
+        )
 
         features = datasets.Features(
             {
                 "key": datasets.Value("string"),
-                "input": datasets.Value("string") if isinstance(self.config.template, str) else chat,
-                "choices": datasets.Sequence(datasets.Value("string")),
+                "template": datasets.Value("string"),
+                "choices": choices,
             }
         )
 
@@ -148,39 +146,39 @@ class Persona(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         if self.config.name == "residency":
-            return [datasets.SplitGenerator(name="test", gen_kwargs={"split": "residency"})]
+            return [datasets.SplitGenerator(name="residency", gen_kwargs={"split": "residency"})]
         elif self.config.name == "demographic":
-            return [
-                datasets.SplitGenerator(
-                    name="test", gen_kwargs={"split": "demographic", "path": "themis/data/persona/demographics.csv"}
-                )
-            ]
+            return [datasets.SplitGenerator(name="demographic", gen_kwargs={"split": "demographic"})]
 
-    def _generate_examples(self, split: str, path=None):  # -> Generator[Tuple[int, Dict[str, Any]], None, None]:
-        print(self.config.name)
+        raise ValueError(f"Unknown config name: {self.config.name}")
+
+    def _generate_examples(self, split: str):
         if split == "residency":
             return self._generate_residency_examples()
         elif split == "demographic":
-            return self._generate_demographic_examples(path)
+            return self._generate_demographic_examples()
 
-    def _format(self, persona: str) -> str | list[dict]:
-        if self.is_chat:
-            return ast.literal_eval(re.sub(string=self.template, pattern="{persona}", repl=persona))
-        else:
-            return self.template.format(persona=persona)
+        raise NotImplementedError(f"Unknown split: {split}")
 
-    def _generate_residency_examples(self):  # -> Generator[Tuple[int, Dict[str, Any]], None, None]:
+    def _generate_residency_examples(self):
         for i, state in enumerate(_STATES):
-            persona = self._format(persona=state)
-            yield i, {"key": state, "input": persona, "choices": self.choices}
+            persona = self.template.format(persona=state)
+            yield (
+                i,
+                {
+                    "key": state,
+                    "template": persona,
+                    "choices": self.choices,
+                },
+            )
 
+        # U.S citizenship
         persona = re.sub(string=self.template, pattern=self.sub["pattern"], repl=self.sub["repl"])
-        persona = ast.literal_eval(persona) if self.is_chat else persona
-        yield 51, {"key": "U.S.", "input": persona, "choices": self.choices}
+        yield 51, {"key": "U.S.", "template": persona, "choices": self.choices}
 
-    def _generate_demographic_examples(self, path):  # -> Generator[Tuple[int, Dict[str, Any]], None, None]:
-        demographics = pd.read_csv(path, sep=",", quotechar='"', skipinitialspace=True)
+    def _generate_demographic_examples(self):
+        demographics = pd.read_csv(_DEMOGRAPHICS_PATH, sep=",", quotechar='"', skipinitialspace=True)
         for i, row in demographics.iterrows():
             key = f"{row['demographic']} - {row['group']}"
-            persona = self.template(persona=row["persona"])
-            yield i, {"key": key, "persona": persona, "choices": self.config.choices}
+            persona = self.template.format(persona=row["persona"])
+            yield i, {"key": key, "template": persona, "choices": self.config.choices}
