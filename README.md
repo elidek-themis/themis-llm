@@ -1,7 +1,6 @@
 ### Installation
-Use `make environment` in order to reproduce the environment. \
-We suggest to create and activate a fresh conda environment beforehand (`python==3.12`). \
-If you prefer poetry as your environment manager, libraries will be installed in `themis-llm/.venv`.
+Use `make install` in order to reproduce the environment. \
+Alternatively, use `make install-dev` in order to install in development mode.
 
 ### LM Evaluation Harness
 The backbone of the experiments is based on `lm-eval-harness`. \
@@ -24,7 +23,7 @@ The main experiment config is described in `themis-llm\data\conf\config.yaml`
    - use `poetry run themis` to run the experiment
      - overrides are supported through `poetry run themis +task=task_1` | `poetry run themis +task=[task_2,task_3]`
      - multiruns are supported through `poetry run themis -m model=model_1,model_2`
-4) Experiments are saved with a four letter slug, e.g. `themis-llm\data\experiments\tangerine_chinchilla_of_tenacity`, \
+4) Experiments are saved with a three letter slug, e.g. `themis-llm\data\experiments\tangerine_chinchilla_of_tenacity`, \
 the directory contains
    - `__main__.log`, the logs of the experiment
    - `experiment.yaml`, a copy of the HydraConfig used for uniqueness
