@@ -2,7 +2,7 @@ install:
 	@uv venv
 	@uv pip install -e .
 
-intall-dev:
+install-dev:
 	@uv venv
 	@uv pip install -e .["dev","viz"]
 
