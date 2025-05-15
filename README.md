@@ -16,8 +16,7 @@ The main experiment config is described in `themis-llm\data\conf\config.yaml`
 
 ### Example
 1) Create a new Huggingface Builder and lm-eval task and populate the directories.
-2) Use `make list_tasks` to confirm the task is registered.
-3) Update the HydraConfig
+2) Update the HydraConfig
    - mandatory values are `task` and `model`
    - `task` can be either a single string or a list of strings
    - use `poetry run themis` to run the experiment
