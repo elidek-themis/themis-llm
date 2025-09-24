@@ -25,12 +25,12 @@ def norm_prob_styler(df: pd.DataFrame) -> pd.DataFrame.style:
     return df.style.background_gradient(cmap="Greens", vmin=0, vmax=1, text_color_threshold=0.3)
 
 
-def diff_styler(df: pd.DataFrame, subset: list) -> pd.io.formats.style.Styler:
+def diff_styler(df: pd.DataFrame, subset: list) -> pd.DataFrame.style:
     fn = lambda x: "background-color: {}; color:black".format(("#ea9999", "#a4c2f4")[x > 0])
     return df.style.map(func=fn, subset=pd.IndexSlice[slice(None), subset])
 
 
-def stats_styler(df: pd.DataFrame) -> pd.io.formats.style.Styler:
+def stats_styler(df: pd.DataFrame) -> pd.DataFrame.style:
     fn = lambda x: "background-color: {}; color:black".format(("#ea9999", "#a4c2f4")[x > 0])
 
     us_subset = pd.IndexSlice[["U.S. prompt", "state_avg"], :]

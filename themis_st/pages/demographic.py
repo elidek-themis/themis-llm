@@ -1,16 +1,13 @@
-import re
 import os.path as osp
 
 import pandas as pd
 import streamlit as st
 
 from themis.data.repository import ExperimentOutput
-from themis_st.processing.plot import catplot
+from themis_st.processing.plot import catplot, demographic_pointplot
 from themis_st.processing.style import nll_styler, diff_styler, prob_styler, stats_styler, norm_prob_styler
 from themis.definitions.constants import RAW_PATH
 from themis_st.processing.process import (
-    ElectionResults,
-    get_nll_df,
     get_voting,
     get_prob_df,
     get_differences,
@@ -47,7 +44,10 @@ def update_selection() -> None:
     selection = index.difference(selection)
     D_choices = menu_df.loc[selection, "Democratic"]
     R_choices = menu_df.loc[selection, "Republican"]
-    st.session_state.choices = D_choices.to_list() + R_choices.to_list()
+    st.session_state.choices = {
+        "Democratic": D_choices.to_list(),
+        "Republican": R_choices.to_list(),
+    }
     st.session_state.columns = menu_df.loc[selection, "column"].to_list()
 
 
@@ -58,32 +58,32 @@ def task_summary(output: ExperimentOutput, task: str) -> None:
     input_col, menu_col = st.columns([0.4, 0.8])
     # input column
     template = dataset_kwargs.get("template")
-    sub = dataset_kwargs.get("sub")
-    us_template = re.sub(string=template, **sub)
     input_col.write("Input")
-    input_col.write({"template": template, "sub": sub, "U.S. template": us_template})
+    input_col.write({"template": template})
 
     # menu column
     menu_col.write("Menu")
     choices = dataset_kwargs.get("choices")
     if "choices" not in st.session_state:
-        st.session_state.choices = choices
+        st.session_state.choices = {
+            "Democratic": choices["pro"],
+            "Republican": choices["contra"],
+        }
 
-    no_choices = int(len(choices) / 2)
-    D_choices, R_choices = choices[:no_choices], choices[no_choices:]
     columns = dataset_kwargs.get("columns")
     if "columns" not in st.session_state:
         st.session_state.columns = columns
 
     menu_df = pd.DataFrame(
         {
-            "Democratic": D_choices,
-            "Republican": R_choices,
+            "Democratic": choices["pro"],
+            "Republican": choices["contra"],
             "column": columns,
         }
     )
-    # if "menu_df" not in st.session_state:
-    st.session_state.menu_df = menu_df
+
+    if "menu_df" not in st.session_state:
+        st.session_state.menu_df = menu_df
 
     menu_col.dataframe(
         data=menu_df,
@@ -91,6 +91,7 @@ def task_summary(output: ExperimentOutput, task: str) -> None:
         key="menu",
         on_select=update_selection,
     )
+    update_selection()
 
 
 def nll_section(nll_df: pd.DataFrame, key: str) -> None:
@@ -144,6 +145,23 @@ def catplot_section(diff: pd.DataFrame, kind: str, title: str = "") -> None:
         st.pyplot(g)
 
 
+def pointplot_section(diff: pd.DataFrame, dataset: pd.DataFrame) -> None:
+    pt_diff = diff[st.session_state.columns + ["* mean"]].reset_index()
+    pt_diff.rename({"* mean": "prediction"}, axis=1, inplace=True)
+    pt_diff["prediction"] = pt_diff["prediction"].map(lambda x: "Democratic" if x > 0 else "Republican")
+
+    pt_diff["pct_diff"] = dataset["pct_diff"]
+    pt_diff["outcome"] = pt_diff["pct_diff"].apply(lambda x: "blue" if x > 0 else "red")
+
+    pt_diff = pt_diff.melt(id_vars=["Demographic", "pct_diff", "prediction", "outcome"])
+
+    fig = demographic_pointplot(pt_diff=pt_diff)
+
+    _, pointplot_col, _ = st.columns([0.2, 0.35, 0.2])
+    with pointplot_col:
+        st.pyplot(fig)
+
+
 def metrics_section(norm_prob_df: pd.DataFrame, diff: pd.DataFrame) -> None:
     st.subheader("Metrics")
     voting_20 = get_voting(voting_path=osp.join(RAW_PATH, "voting-2020.xlsx"))
@@ -175,26 +193,69 @@ def metrics_section(norm_prob_df: pd.DataFrame, diff: pd.DataFrame) -> None:
 
 st.title("LLM Election Polls")
 runs = st.session_state.runs
-runs = runs[runs.task.str.contains("residency")]
+runs = runs[runs.task.str.contains("demographic")]
 
 with st.sidebar:
     st.write("Repository")
     model, task = select(runs=runs)
 run = runs[(runs.model == model) & (runs.task == task)]
-# run = repo.load(model=model, task=task)
 
 output = run.output.item()
 task_summary(output=output, task=task)
 
-results = ElectionResults(output=output)
+##############
+samples = [x["doc"] for x in output.results["samples"][task]]
+dataset = pd.DataFrame(samples)[["demographic", "group", "pct"]]
 
-data = results.metrics[task]["acc"]
-nll_df = get_nll_df(data=data, index=results.keys, columns=results.choices[task], use_cols=st.session_state.choices)
-nll_section(nll_df=nll_df, key="nll_acc")
+blue_pct = dataset.pct.apply(lambda pct: pct["blue_pct"])
+red_pct = dataset.pct.apply(lambda pct: pct["red_pct"])
+dataset.drop("pct", axis=1, inplace=True)
 
+dataset["blue_pct"] = blue_pct / (blue_pct + red_pct)
+dataset["red_pct"] = red_pct / (blue_pct + red_pct)
+
+dataset["pct_diff"] = dataset["blue_pct"] - dataset["red_pct"]
+dataset.set_index(["demographic"], inplace=True)
+dataset.loc["LGBT", "group"] = dataset.loc["LGBT", "group"].str.cat((" LGBT", " LGBT"))
+dataset = dataset.reset_index(drop=True).rename({"group": "Demographic"}, axis=1)
+
+keys = dataset["Demographic"]
+choices = output.task_configs[task]["dataset_kwargs"]["choices"]
+columns = output.task_configs[task]["dataset_kwargs"]["columns"]
+# ####################
+D_data = output.metrics[task]["democratic"]
+D_df = pd.concat((keys, pd.DataFrame(D_data)), axis=1).set_index("Demographic")
+D_df = D_df[st.session_state.choices["Democratic"]]
+
+R_data = output.metrics[task]["republican"]
+R_df = pd.concat((keys, pd.DataFrame(R_data)), axis=1).set_index("Demographic")
+R_df = R_df[st.session_state.choices["Republican"]]
+
+nll_df = -pd.concat((D_df, R_df), keys=("Democratic", "Republican"), axis=1)
 prob_df, norm_prob_df = get_prob_df(nll_df=nll_df)
-prob_section(prob_df=prob_df, key="prob_acc")
-norm_prob_section(norm_prob_df=norm_prob_df)
 diff = get_differences(df=norm_prob_df, columns=st.session_state.columns)
-diff_section(diff=diff)
-metrics_section(norm_prob_df=norm_prob_df, diff=diff)
+
+with st.popover("Calculations", use_container_width=True):
+    nll_section(nll_df=nll_df, key="nll_acc")
+    prob_section(prob_df=prob_df, key="prob_acc")
+    norm_prob_section(norm_prob_df=norm_prob_df)
+    diff_section(diff=diff)
+
+##########################
+pointplot_section(diff=diff, dataset=dataset)
+##########################
+st.subheader("Predictions")
+ground_truth = dataset.set_index(["Demographic"])
+
+options = st.session_state.columns + ["* sum", "* mean"]
+completion = st.selectbox("completion", options=options, index=options.index("* mean"))
+idx = options.index(completion)
+d_prob = norm_prob_df["Democratic"].iloc[:, idx]
+r_prob = norm_prob_df["Republican"].iloc[:, idx]
+
+pred_df = pd.concat((d_prob, r_prob), axis=1)
+pred_df["pred_pct"] = pred_df.iloc[:, -2] - pred_df.iloc[:, -1]
+pred_df = pd.concat((ground_truth, pred_df), axis=1)
+
+fn = lambda x: "background-color: {}; color:black".format(("#ea9999", "#a4c2f4")[x > 0])
+st.dataframe(pred_df.style.map(func=fn, subset=pd.IndexSlice[slice(None), ["pct_diff", "pred_pct"]]), height=700)

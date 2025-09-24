@@ -1,41 +1,28 @@
 import streamlit as st
 
-from themis.data.repository import Repository
-from themis_st.processing.utils import get_runs_df
+from themis.data.repository import get_repo
 
 st.title("Welcome to Themis ⚖️")
 
 if "repo" not in st.session_state:
     with st.spinner("Loading repository..."):
-        st.session_state.repo = Repository()
-        runs = st.session_state.repo.db.table("experiments").all()
-        st.session_state.runs = get_runs_df(runs)
+        st.session_state.repo = get_repo()
+        st.session_state.repo.sort_values(by="model", inplace=True)
 
-if "run" not in st.session_state:
-    st.session_state.run = None
+no_experiments = len([data for data in st.session_state.repo.data if not data.is_group])
+st.subheader(f"No experiments: {no_experiments}")
 
+st.dataframe(st.session_state.repo.astype(str))
 
-def update_run() -> None:
-    select_idx, *_ = st.session_state.runs_table.selection.rows
-    output = st.session_state.runs.iloc[select_idx]["output"]
-    st.session_state.run = output
+st.write(st.session_state.repo.iloc[0].data.is_group)
 
 
-model_tab, metric_tab, runs_tab = st.tabs(["models", "metrics", "experiments"])
-
-with model_tab:
-    st.write(st.session_state.repo.db.table("model_hub").all())
-with metric_tab:
-    st.write(st.session_state.repo.db.table("metrics").all())
-with runs_tab:
-    event = st.dataframe(
-        st.session_state.runs,
-        # use_container_width=True,
-        hide_index=False,
-        on_select=update_run,
-        selection_mode="single-row",
-        key="runs_table",
-    )
-
-    if st.session_state.run:
-        st.write(st.session_state.run)
+st.markdown(
+    """
+    ### Notes
+    * Pick Q8_0 if it fits. There is practically no point to run fp16/bf16 versions since Q8 is nearly loseless with half of the memory usage.
+    * Choose the largest K-quant that can fit.
+    * If you are on a GPU and need to go below Q4, pick the biggest IQ quant. Those are slightly higher quality for the size, but slower for CPU inference.
+    * If you need to go below Q3, consider running a smaller sized model.
+    """
+)

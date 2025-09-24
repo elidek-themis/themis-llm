@@ -1,81 +1,46 @@
-import logging
+import re
 
-from typing import Any
-from dataclasses import dataclass
-
-import pandas as pd
-
-from pydantic import BaseModel, field_validator
-
-from themis.definitions.config import ExperimentConfig
-
-logger = logging.getLogger(__name__)
-
-ALL_TASKS = ["auto", "generate", "embedding", "embed", "classify", "score", "reward", "transcription"]
+from jinja2 import Environment, StrictUndefined
 
 
-class VLLMArgs(BaseModel):
-    model: str
-    task: str = "generate"
-    max_model_len: int
-    max_logprobs: int
-    swap_space: int
-    cpu_offload_gb: float
-    gpu_memory_utilization: float
-    seed: int
-
-    @field_validator("task")
-    def validate_task(cls, v: str) -> str:
-        if v not in ALL_TASKS:
-            raise ValueError(f"task should be any of {ALL_TASKS}")
-        return v
+# e.g. {{ "foo123bar" | regex_replace("[0-9]+", "XYZ") }}
+def regex_replace(string, pattern, repl, count: int = 0):
+    """Implements the `re.sub` function as a custom Jinja filter."""
+    return re.sub(pattern, repl, string, count=count)
 
 
-@dataclass
-class ExperimentOutput:
-    root: str
-    log: str
-    config: ExperimentConfig
-    results: dict[str, Any]
-
-    @property
-    def model(self) -> str:
-        return self.config.model
-
-    @property
-    def tasks(self) -> str | list[str]:
-        return self.config.task
-
-    @property
-    def task_configs(self) -> dict[str, Any]:
-        return self.results.get("configs", {})
-
-    @property
-    def alias(self) -> str:
-        _, alias = self.root.rsplit("/", 1)
-        return alias
-
-    def __str__(self) -> str:
-        return self.alias
-
-    def __repr__(self) -> str:
-        return self.alias
+env = Environment(undefined=StrictUndefined)
+env.filters["regex_replace"] = regex_replace
 
 
-def get_runs_df(runs: list) -> pd.DataFrame:
-    columns = ("model", "task", "output")
+def apply_template(template: str, doc: dict) -> str:
+    rtemplate = env.from_string(template)
+    return rtemplate.render(**doc)
 
-    runs = [
-        ExperimentOutput(
-            root=run["dir"],
-            log=run["log"],
-            config=ExperimentConfig(**run["config"]),
-            results=run["results"],
-        )
-        for run in runs
-    ]
 
-    data = [(e.model, e.tasks, e) for e in runs]
-    runs_df = pd.DataFrame(data, columns=columns)
+def format_jinja(template: str, indent_width: int = 4) -> str:
+    token_re = re.compile(r"({{.*?}}|{%-?.*?-%}|{%.*?%})", re.DOTALL)
+    tokens = token_re.findall(template)
+    indent = 0
+    result = []
 
-    return runs_df.explode("task").reset_index(drop=True)
+    for token in tokens:
+        stripped = token.strip()
+
+        # dedent before writing if it's an end tag
+        if (
+            re.match(r"{%[-\s]*end\w+", stripped)
+            or re.match(r"{%[-\s]*else", stripped)
+            or re.match(r"{%[-\s]*elif", stripped)
+        ):
+            indent -= 1
+
+        result.append(" " * (indent * indent_width) + stripped)
+
+        # re-indent after if it's an opening tag (not else/elif/end)
+        if re.match(r"{%[-\s]*(for|if|block|macro|filter|with)\b", stripped):
+            indent += 1
+        elif re.match(r"{%[-\s]*(else|elif)\b", stripped):
+            indent += 1
+
+    return "\n".join(result)
