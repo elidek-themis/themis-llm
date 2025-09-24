@@ -1,0 +1,4 @@
+model: localchat-completions
+model_args:
+  base_url: localhost:8000
+  pretrained: ${oc.select:model, ???}

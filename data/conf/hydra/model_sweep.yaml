@@ -1,0 +1,8 @@
+defaults:
+  - stores
+  - _self_
+
+mode: MULTIRUN
+sweeper:
+  params:
+    ++model: ${models.all}

@@ -5,7 +5,6 @@ formatters:
     format: "[%(pathname)s] %(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
   custom:
     class: themis.utils.tools.CustomFormatter
-    # datefmt: "%m-%d %H:%M:%S"
 handlers:
   console:
     class: logging.StreamHandler
@@ -16,7 +15,7 @@ handlers:
     class: logging.FileHandler
     level: INFO
     formatter: custom
-    filename: ${hydra.runtime.output_dir}/${hydra.job.name}.log
+    filename: ${hydra.runtime.output_dir}/logs.log
 
 root:
   level: INFO
@@ -32,9 +31,8 @@ loggers:
     handlers: [console, file]
     propagate: no
   lm_eval:
-    level: INFO
+    level: DEBUG
     handlers: [console, file]
     propagate: no
-
 
 disable_existing_loggers: false

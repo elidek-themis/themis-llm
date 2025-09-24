@@ -1,0 +1,13 @@
+defaults:
+  - _self_
+  - override job_logging: custom
+
+output_subdir: null
+run:
+  dir: data/experiments/${sanitize_model:${model}}/${sanitize_tasks:${tasks}}
+sweep:
+  dir: data/experiments/
+  subdir: ${sanitize_model:${model}}/${sanitize_tasks:${tasks}}
+callbacks:
+  save_job_info:
+    _target_: themis.utils.callbacks.MyCallback

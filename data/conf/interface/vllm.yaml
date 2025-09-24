@@ -1,5 +1,30 @@
-name: lm_eval_vllm
-args:
-  pretrained: "${oc.select: ...model, ???}"
-  gpu_memory_utilization: 0.8
-  seed: "${oc.select: ...seed, ???}"
+model: vllm
+model_args:
+  pretrained: ${oc.select:model, ???}
+  gpu_memory_utilization: 0.9
+  max_model_len: 512
+  max_num_seqs: 1
+  # cpu_offload_gb: 2
+  seed: ${seed}
+
+# pretrained: "${oc.select: ...model, ???}"
+# dtype: auto
+# revision: null
+# trust_remote_code: false
+# tokenizer: null
+# tokenizer_mode: auto
+# tokenizer_revision: null
+# add_bos_token: false
+# prefix_token_id: null
+# tensor_parallel_size: 1
+# quantization: null
+# max_gen_toks: 256
+# swap_space: 4
+# batch_size: 1
+# max_batch_size: null
+# max_length: null
+# max_model_len: null
+# device: cuda
+# data_parallel_size: 1
+# lora_local_path: null
+# enable_thinking: false

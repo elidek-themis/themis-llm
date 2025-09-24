@@ -1,0 +1,3 @@
+model: hf
+model_args:
+  pretrained: ${oc.select:model, ???}

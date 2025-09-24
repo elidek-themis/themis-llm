@@ -1,0 +1,54 @@
+# model, task
+model: ${interface.model}                                         # name of the model to evaluate, e.g., 'hf'
+tasks: ${tasks}                                                   # comma-separated list of task names or groupings, e.g. 'mmlu,hellaswag'
+model_args: ${to_string:${interface.model_args}}                  # model-specific args, e.g. {pretrained: EleutherAI/pythia-160m, dtype: float32}
+
+# evaluation
+num_fewshot: null                                                 # no of few-shot examples to include in the context
+batch_size: 1                                                     # batch size: 'auto', 'auto:N', or an integer
+max_batch_size: null                                              # max batch size when using auto mode
+
+device: null                                                      # device to run on, e.g., 'cuda', 'cuda:0', 'cpu'
+output_path: ${hydra:run.dir}/results.json                        # path to output metrics or samples, can be directory or file
+limit: ${oc.select:limit, null}                                   # limit number of examples per task (float <1 = percent)
+samples: null                                                     # path to JSON with specific doc indices to evaluate
+
+# caching
+use_cache: .eval_cache/${sanitize_model:${model}}.db              # path to a sqlite DB file to cache model responses
+cache_requests: true                                              # whether to cache dataset request builds: 'true', 'refresh', or 'delete'
+
+# logging
+write_out: true                                                   # print the first few prompts
+log_samples: true                                                 # save all model outputs and documents for analysis
+verbosity: null                                                   # [Deprecated] Logging level: DEBUG, INFO, etc.
+show_config: false                                                # print full task config after evaluation
+include_path: tasks                                               # additional path for loading external tasks
+
+# prompt formatting
+system_instruction: null                                          # system instruction to prepend in prompts
+apply_chat_template: ${oc.select:apply_chat_template, false}      # apply chat template; set to template name for specific template
+fewshot_as_multiturn: false                                       # treat few-shot examples as multi-turn conversation
+
+# generation arguments
+gen_kwargs: null                                                  # generation-specific args for greedy_until tasks, e.g. {temperature: 0.7}
+predict_only: false                                               # only write predictions, skip metrics computation
+
+# backends
+wandb_args: ""                                                    # args for wandb.init, e.g. project=lm-eval
+wandb_config_args: ""                                             # args for wandb.config.update, e.g. lr=0.01,repeats=3
+hf_hub_log_args: ""                                               # args for HF Hub logging, e.g. hub_results_org=EleutherAI
+
+# security
+trust_remote_code: false                                          # allow loading remote HF dataset/model code
+confirm_run_unsafe_code: true                                     # confirm running unsafe task code
+check_integrity: false                                            # run test suite to check integrity of task configs
+
+# metadata, seed
+metadata:
+  model: ${model}
+  tasks: ${tasks}
+seed:
+  - ${seed} # python
+  - ${seed} # numpy
+  - ${seed} # torch
+  - ${seed} # fewshot
