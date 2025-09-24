@@ -1,171 +1,102 @@
 import os
-import pickle
-import os.path as osp
+import copy
+import json
 
-from typing import Any
+from pathlib import Path
 from dataclasses import dataclass
 
 import pandas as pd
-import evaluate
 
-from tinydb import Query, TinyDB
-from tinydb.table import Document
-from pydantic_yaml import parse_yaml_file_as
-from huggingface_hub import scan_cache_dir
-from tinydb.storages import MemoryStorage
-from lm_eval.api.registry import METRIC_REGISTRY
+from lm_eval.loggers.utils import remove_none_pattern
 
-from themis.utils.tools import format_size
-from themis.definitions.config import ExperimentConfig
 from themis.definitions.constants import EXPERIMENTS_PATH
 
 
 @dataclass
-class ExperimentDirectory:
-    log: str = "__main__.log"
-    config: str = "experiment.yaml"
-    job_return: str = "job_return.pickle"
+class ExperimentFolder:
+    path: Path
+    files: list[str]
 
-    files = [job_return, log, config]
+    def __post_init__(self):
+        with open(self.path / "logs.log") as f:
+            self.log = f.read()
 
+        with open(self.path / "results.json") as f:
+            self.results = json.load(f)
+        self._calc_metrics()
 
-@dataclass
-class ExperimentOutput:
-    root: str
-    log: str
-    config: ExperimentConfig
-    results: dict[str, Any]
+        self._samples = {}
+        for f in self.files:
+            if f.startswith("samples_") and f.endswith(".jsonl"):
+                key = f[len("samples_") : -len(".jsonl")]
+                self._samples[key] = self.path / f
+
+    def samples(self, key: str):
+        if key not in self._samples:
+            raise KeyError(f"Sample key '{key}' not found.")
+        file_path = self._samples[key]
+        with open(file_path, encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    yield json.loads(line)
+
+    def _calc_metrics(self) -> None:  # fix subtasks ,none
+        metrics = copy.deepcopy(self.results.get("results", {}))
+
+        tmp_metrics = copy.deepcopy(metrics)
+        for task_name in self.tasks:
+            task_metrics = tmp_metrics.get(task_name, {})
+            for metric_name, metric_value in task_metrics.items():
+                _metric_name, removed = remove_none_pattern(metric_name)
+                if isinstance(metric_value, str):
+                    metrics[task_name].pop(metric_name)
+                elif removed:
+                    metrics[task_name][_metric_name] = metric_value
+                    metrics[task_name].pop(metric_name)
+
+        self.metrics = metrics
+
+    @property
+    def config(self):
+        return self.results.get("config")
+
+    @property
+    def task_configs(self):
+        return self.results.get("configs")
 
     @property
     def model(self) -> str:
-        return self.config.model
+        model = self.results["model_name_sanitized"]
+        # _, model = model.split("/")
+        return model
 
     @property
-    def tasks(self) -> str | list[str]:
-        return self.config.task
+    def tasks(self):
+        return list(self.results.get("group_subtasks"))
+
+    @classmethod
+    def is_valid(cls, files: list[str]) -> bool:
+        has_results = "results.json" in files
+        has_log = "logs.log" in files
+        has_samples = any(f.startswith("samples_") and f.endswith(".jsonl") for f in files)
+        return has_results and has_log and has_samples
 
     @property
-    def task_configs(self) -> dict:
-        return self.results.get("configs", {})
-
-    @property
-    def alias(self) -> str:
-        _, alias = self.root.rsplit("/", 1)
-        return alias
+    def is_group(self) -> bool:
+        return "group" in self.results
 
     def __str__(self) -> str:
-        return self.alias
-
-    def __repr__(self) -> str:
-        return self.alias
+        return json.dumps(self.results, indent=4)
 
 
-class Repository:
-    def __init__(self) -> None:
-        # TODO: persistent storage requires
-        # to serialize the pickled results
-        self.db = TinyDB(storage=MemoryStorage)
+def get_repo() -> pd.DataFrame:
+    experiments = []
+    for root, _, files in os.walk(EXPERIMENTS_PATH):
+        if ExperimentFolder.is_valid(files=files):
+            path = Path(root)
+            experiments.append(ExperimentFolder(path=path, files=files))
 
-        metrics = self._get_metrics()
-        metrics_table = self.db.table("metrics")
-        metrics_table.insert(metrics)
+    data = [(e.model, e.tasks, e) for e in experiments]
+    runs = pd.DataFrame(data, columns=("model", "task", "data"))
 
-        model_hub = self._get_model_hub()
-        model_hub_table = self.db.table("model_hub")
-        for model in model_hub:
-            model_hub_table.insert(model)
-
-        experiments = self._get_experiments()
-        experiments_table = self.db.table("experiments")
-        for experiment in experiments:
-            experiments_table.insert(experiment)
-
-    def _get_metrics(self) -> dict:
-        lm_eval_metrics = list(METRIC_REGISTRY.keys())
-        hf_metrics = evaluate.list_evaluation_modules()
-
-        return {
-            "lm_eval_metrics": lm_eval_metrics,
-            "hf_metrics": hf_metrics,
-        }
-
-    def _get_model_hub(self) -> dict:
-        to_drop = ["repo_path", "revisions", "last_accessed", "last_modified", "nb_files"]
-
-        cache_dir = scan_cache_dir()
-        hf_repo = pd.DataFrame(cache_dir.repos).drop(columns=to_drop)
-        hf_repo = hf_repo[hf_repo.repo_type == "model"]
-        hf_repo.sort_values(by="size_on_disk", inplace=True)
-        hf_repo["size_on_disk"] = hf_repo["size_on_disk"].map(format_size)
-
-        hf_repo.rename(columns={"size_on_disk": "size", "repo_id": "model"}, inplace=True)
-        hf_repo.drop("repo_type", axis=1, inplace=True)
-        hf_repo.reset_index(drop=True, inplace=True)
-
-        return hf_repo.to_dict(orient="records")
-
-    def _get_experiments(self) -> list[dict]:
-        experiments = []
-        for root, _, files in os.walk(EXPERIMENTS_PATH):
-            if files == ExperimentDirectory.files:
-                log, config, results = self._parse_experiment_directory(path=root)
-
-                experiments.append(
-                    {
-                        "dir": root,
-                        "config": config,
-                        "log": log,
-                        "results": results,
-                    }
-                )
-
-        return experiments
-
-    def _parse_experiment_directory(self, path: str) -> tuple[str, dict, dict]:
-        log_path = osp.join(path, ExperimentDirectory.log)
-        with open(log_path) as file:
-            log = file.read()
-
-        config_path = osp.join(path, ExperimentDirectory.config)
-        config = parse_yaml_file_as(model_type=ExperimentConfig, file=config_path).model_dump()
-
-        results_path = osp.join(path, ExperimentDirectory.job_return)
-        with open(results_path, "rb") as handle:
-            results = pickle.load(handle)
-
-        return log, config, results
-
-    def load(self, config: ExperimentConfig) -> list[Document]:
-        Experiment = Query()
-        experiment_table = self.db.table("experiments")
-
-        model = config.model
-        task = config.task
-        eval_kwargs = config.eval_kwargs.model_dump()
-
-        results = experiment_table.search(
-            (Experiment.config.model == model)
-            & (Experiment.config.task.all(task))
-            & (Experiment.config.eval_kwargs == eval_kwargs)
-        )
-
-        for result in results:
-            print(f"Found experiment in {result['dir']}")
-
-        return results
-
-    def contains(self, config: ExperimentConfig, task: str | list) -> bool:
-        Experiment = Query()
-        experiment_table = self.db.table("experiments")
-
-        model = config.model
-        eval_kwargs = config.eval_kwargs.model_dump()
-
-        if isinstance(task, str):
-            task = [task]
-
-        return experiment_table.contains(
-            (Experiment.config.model == model)
-            & (Experiment.config.task.all(task))
-            & (Experiment.config.eval_kwargs == eval_kwargs)
-        )
+    return runs.explode("task")

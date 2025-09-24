@@ -1,116 +1,119 @@
-# Copyright 2020 The HuggingFace Datasets Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# This work contains adaptations of the original CrowS-Pairs dataset,
-# used under Apache License 2.0. Modifications include adding the prompt
-# along with the stereotype and anti-stereotype sentences. The dataset
-# is further used to audit the performance of autoregressive language
-# models in multiple-choice and generation tasks.
-"""CrowS-Pairs: A Challenge Dataset for Measuring Social Biases in Masked Language Models"""
+from pathlib import Path
 
 import pandas as pd
 import datasets
 
+from themis.definitions.constants import RAW_PATH
+
+from .utils import get_differences
+
 _CITATION = """\
-@inproceedings{nangia2020crows,
-    title = "{CrowS-Pairs: A Challenge Dataset for Measuring Social Biases in Masked Language Models}",
-    author = "Nangia, Nikita  and
-      Vania, Clara  and
-      Bhalerao, Rasika  and
-      Bowman, Samuel R.",
-    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing",
-    month = nov,
-    year = "2020",
-    address = "Online",
-    publisher = "Association for Computational Linguistics"
+@inproceedings{neveol2022french,
+  title={French CrowS-Pairs: Extending a challenge dataset for measuring social bias in masked language models to a language other than English},
+  author={N{\'e}v{\'e}ol, Aur{\'e}lie and Dupont, Yoann and Bezan{\\c{c}}on, Julien and Fort, Kar{\"e}n},
+  booktitle={ACL 2022-60th Annual Meeting of the Association for Computational Linguistics},
+  year={2022}
 }
-"""
-# ruff: noqa: E501
-_DESCRIPTION = """\
-CrowS-Pairs, a challenge dataset for measuring the degree to which U.S. stereotypical biases present in the masked language models (MLMs).
-"""
+"""  # noqa: E501
 
-_URLS = [
-    "https://raw.githubusercontent.com/nyu-mll/crows-pairs/master/data/crows_pairs_anonymized.csv",
-    "https://raw.githubusercontent.com/nyu-mll/crows-pairs/refs/heads/master/data/prompts.csv",
-]
+_DESCRIPTION = """Corrections over the english revised version of CrowS-Pairs"""
 
-_BIAS_TYPES = [
-    "race-color",
-    "socioeconomic",
-    "gender",
-    "disability",
-    "nationality",
-    "sexual-orientation",
-    "physical-appearance",
-    "religion",
-    "age",
-]
+_HOMEPAGE = "https://gitlab.inria.fr/french-crows-pairs/acl-2022-paper-data-and-code/-/tree/main"
+
+_LICENSE = ""
+
+_URLS = None
+
+
+class CrowsPairsConfig(datasets.BuilderConfig):
+    def __init__(
+        self,
+        mask_token: str,
+        min_mask_size: int,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.mask_token = mask_token
+        self.min_mask_size = min_mask_size
 
 
 class CrowsPairsPrompts(datasets.GeneratorBasedBuilder):
-    VERSION = datasets.Version("1.1.0")
+    "CrowS-Pairs: A Challenge Dataset for Measuring Social Biases in Masked Language Models"
 
-    BUILDER_CONFIGS = [datasets.BuilderConfig(name="test", version=VERSION, description="CrowS-Pairs")]
+    VERSION = datasets.Version("1.2.0")
 
-    DEFAULT_CONFIG_NAME = "test"
+    BUILDER_CONFIGS = [
+        CrowsPairsConfig(
+            name="english",
+            mask_token="<MASK>",
+            min_mask_size=50,
+            version=VERSION,
+            description="English CrowS-Pairs",
+        )
+    ]
+
+    DEFAULT_CONFIG_NAME = "english"
 
     def _info(self):
         features = datasets.Features(
             {
-                "prompt": datasets.Value("string"),
+                "template": datasets.Value("string"),
                 "sent_more": datasets.Value("string"),
                 "sent_less": datasets.Value("string"),
-                # "choices": datasets.Sequence(datasets.Value("string")),
-                "bias_type": datasets.ClassLabel(names=_BIAS_TYPES),
+                "stereo_antistereo": datasets.Value("string"),
+                "bias_type": datasets.Value("string"),
             }
         )
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
+            homepage=_HOMEPAGE,
+            license=_LICENSE,
             citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager):
-        data_files = dl_manager.download_and_extract(_URLS)
+        file_path = Path(RAW_PATH) / "crows_pairs" / "crows_pairs_EN_revised+210_corrections.csv"
+        data_file = dl_manager.download_and_extract(file_path)
 
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TEST,
-                gen_kwargs={"filepaths": data_files},
-            )
+                name="default",
+                gen_kwargs={"filepath": data_file, "split": "default"},
+            ),
+            datasets.SplitGenerator(
+                name="mask",
+                gen_kwargs={"filepath": data_file, "split": "mask"},
+            ),
         ]
 
-    def _generate_examples(self, filepaths):
-        cols = ["sent_more", "sent_less", "stereo_antistereo", "bias_type"]
+    def _generate_examples(self, filepath: str, split: str):
+        def skip_condition(affix, min_mask_size):
+            is_min_len = any(len(infix.split()) > min_mask_size for infix in (affix.infix_1, affix.infix_2))
+            is_empty = not all((affix.infix_1, affix.infix_2))
+            return is_min_len or is_empty
 
-        data_path, prompts_path = filepaths
+        df = pd.read_csv(filepath, sep="\t", index_col=0)
 
-        df = pd.read_csv(data_path, usecols=cols)
-        prompts = pd.read_csv(prompts_path)["prompt"]
-        df = pd.concat([df, prompts], axis=1)
+        if split == "default":
+            for key, row in enumerate(df.to_dict(orient="records")):
+                yield key, {"template": ""} | row
+        elif split == "mask":
+            mask = self.config.mask_token
+            min_mask_size = self.config.min_mask_size
 
-        for key, row in enumerate(df.to_dict(orient="records")):
-            # choices = (row["sent_more"], row["sent_less"])
-            yield (
-                key,
-                {
-                    "sent_more": row["sent_more"],
-                    "sent_less": row["sent_less"],
-                    "prompt": row["prompt"],
-                    # "choices": choices,
-                    "bias_type": row["bias_type"],
-                },
-            )
+            for key, row in enumerate(df.to_dict(orient="records")):
+                affix = get_differences(sent_1=row["sent_more"], sent_2=row["sent_less"])
+                if skip_condition(affix, min_mask_size):
+                    continue  # noqa: E701
+                yield (
+                    key,
+                    {
+                        "template": affix.to_template(mask_token=mask)["template"],
+                        "sent_more": affix.infix_1,
+                        "sent_less": affix.infix_2,
+                        "stereo_antistereo": row["stereo_antistereo"],
+                        "bias_type": row["bias_type"],
+                    },
+                )

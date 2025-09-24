@@ -1,22 +1,19 @@
 import re
 import logging
 
-from typing import Any
-
 import hydra
 import coolname
 
 from yaml import FullLoader, load
-from omegaconf import OmegaConf
 from lm_eval.tasks import TaskManager
 from hydra.core.hydra_config import DictConfig
 
-from themis.definitions.config import Config, table_print
-from themis.definitions.constants import TASK_PATH, CONFIG_PATH
+from themis.definitions.constants import TASK_PATH
 
 logger = logging.getLogger(__name__)
 
 
+# https://github.com/facebookresearch/hydra/blob/main/plugins/hydra_colorlog/hydra_plugins/hydra_colorlog/conf/hydra/hydra_logging/colorlog.yaml
 class CustomFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         if "lm_eval" in record.pathname:
@@ -38,15 +35,6 @@ class CustomFormatter(logging.Formatter):
         )
 
 
-def model_name(name: str) -> str:
-    _, name = name.split("/")  # meta-llama / Llama-3.2-3B
-    return re.sub(r"[^a-zA-Z0-9]", "_", name).lower()  # llama_3_2_3b
-
-
-def slug(count: int) -> str:
-    return coolname.generate_slug(count).replace("-", "_")
-
-
 def recompose_config(config_dir: str, overrides_path: list[str] | None = None) -> DictConfig:
     with hydra.initialize_config_dir(version_base=None, config_dir=config_dir):
         return hydra.compose(config_name="config", return_hydra_config=False)
@@ -57,6 +45,24 @@ def load_yaml_config(config_path: str) -> dict:
         config = load(yaml_fh, Loader=FullLoader)
 
     return config
+
+
+def slug(count: int) -> str:
+    return coolname.generate_slug(count).replace("-", "_")
+
+
+def to_string(args_dict: dict) -> str:
+    return ",".join([f"{k}={v}" for k, v in args_dict.items()])
+
+
+def sanitize_model_name(name: str) -> str:
+    _, name = name.split("/")  # meta-llama / Llama-3.2-3B
+    return re.sub(r"[^a-zA-Z0-9]", "_", name).lower()  # llama_3_2_3b
+
+
+def sanitize_task_name(tasks: str | list) -> str:
+    tasks = ",".join(tasks) if isinstance(tasks, list) else tasks
+    return re.sub(r"\W", "_", tasks)
 
 
 def format_size(num: int) -> str:
@@ -70,18 +76,6 @@ def format_size(num: int) -> str:
             return f"{num_f:3.1f}{unit}"
         num_f /= 1000.0
     return f"{num_f:.1f}Y"
-
-
-def read_config() -> None:
-    OmegaConf.register_new_resolver("slug", slug)
-
-    config_raw = recompose_config(config_dir=CONFIG_PATH)
-    OmegaConf.resolve(config_raw)  # interpolations
-    config_dict: dict[str, Any] = OmegaConf.to_container(cfg=config_raw)  # type: ignore # to dict
-    config = Config(**config_dict)  # pass config for validations
-    table_print(config)
-
-    print(config.experiment)
 
 
 def list_tasks() -> None:

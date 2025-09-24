@@ -65,7 +65,8 @@ _STATES = [
     "Wyoming",
 ]
 
-_DEMOGRAPHICS_PATH = "themis/data/persona/demographics.csv"
+# _DEMOGRAPHICS_PATH = "themis/data/persona/demographics.csv"
+_DEMOGRAPHICS_PATH = "/home/ch_karanikolopoulos/Desktop/themis-llm/themis/data/builders/persona/demographics.csv"
 
 
 class PersonaConfig(datasets.BuilderConfig):
@@ -128,13 +129,32 @@ class Persona(datasets.GeneratorBasedBuilder):
             }
         )
 
-        features = datasets.Features(
+        pct = datasets.Features(
             {
-                "key": datasets.Value("string"),
-                "template": datasets.Value("string"),
-                "choices": choices,
+                "blue_pct": datasets.Value("float"),
+                "red_pct": datasets.Value("float"),
             }
         )
+
+        if self.config.name == "residency":
+            features = datasets.Features(
+                {
+                    "key": datasets.Value("string"),
+                    "template": datasets.Value("string"),
+                    "choices": choices,
+                    # TODO: create states.csv w/ pct
+                }
+            )
+        elif self.config.name == "demographic":
+            features = datasets.Features(
+                {
+                    "demographic": datasets.Value("string"),
+                    "group": datasets.Value("string"),
+                    "template": datasets.Value("string"),
+                    "choices": choices,
+                    "pct": pct,
+                }
+            )
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -177,8 +197,20 @@ class Persona(datasets.GeneratorBasedBuilder):
         yield 51, {"key": "U.S.", "template": persona, "choices": self.choices}
 
     def _generate_demographic_examples(self):
-        demographics = pd.read_csv(_DEMOGRAPHICS_PATH, sep=",", quotechar='"', skipinitialspace=True)
+        demographics = pd.read_csv(_DEMOGRAPHICS_PATH)
         for i, row in demographics.iterrows():
-            key = f"{row['demographic']} - {row['group']}"
             persona = self.template.format(persona=row["persona"])
-            yield i, {"key": key, "template": persona, "choices": self.config.choices}
+
+            yield (
+                i,
+                {
+                    "demographic": row["demographic"],
+                    "group": row["group"],
+                    "template": persona,
+                    "choices": self.config.choices,
+                    "pct": {
+                        "blue_pct": row["blue_pct"],
+                        "red_pct": row["red_pct"],
+                    },
+                },
+            )
