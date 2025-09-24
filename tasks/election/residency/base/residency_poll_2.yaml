@@ -1,0 +1,6 @@
+task: residency_poll_2
+tag: residency_base
+include: ../residency_template_yaml
+dataset_kwargs:
+  template: "In the 2024 U.S. presidential election, a registered voter in {state} is more likely to identify with"
+include: ../../choices_short_yaml

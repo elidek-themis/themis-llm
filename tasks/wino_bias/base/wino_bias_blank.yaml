@@ -1,0 +1,3 @@
+include: ../wino_bias.yaml
+task: wino_bias_blank
+doc_to_text: "{{template.replace('[pronoun]', 'BLANK')}} The most likely pronoun for BLANK is"

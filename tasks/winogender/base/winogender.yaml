@@ -1,0 +1,5 @@
+tag:
+ - winogender_base
+include: ../winogender.yaml
+task: winogender_all_base
+doc_to_text: "{{sentence}} ‘{{pronoun.capitalize()}}’ refers to the"

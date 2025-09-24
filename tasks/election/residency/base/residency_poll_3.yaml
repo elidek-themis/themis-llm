@@ -1,0 +1,6 @@
+task: residency_poll_3
+tag: residency_base
+include: ../residency_template_yaml
+dataset_kwargs:
+  template: "In the 2024 U.S. presidential election, in {state}, the majority of voters support"
+include: ../../choices_short_yaml

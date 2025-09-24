@@ -1,0 +1,10 @@
+include: ../crows_pairs_template_yaml
+dataset_kwargs:
+  min_mask_size: 1
+  mask_token: _
+  trust_remote_code: true
+task: crows_pairs_mask_miss_it
+test_split: mask
+doc_to_text: "{{ template }} What is the missing word?"
+doc_to_choice: "{{ [sent_more, sent_less] }}"
+gen_prefix: The missing word is

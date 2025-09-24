@@ -1,0 +1,4 @@
+include: ../wino_bias.yaml
+task: wino_bias_blank_it
+doc_to_text: "{{template}} What is the most likely pronoun for BLANK?"
+gen_prefix: The most likely pronoun for BLANK is

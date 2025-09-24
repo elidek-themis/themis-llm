@@ -1,0 +1,12 @@
+group: stereo_set_inter_base
+task:
+  - stereo_set_inter
+aggregate_metric_list:
+  - metric: lms
+    aggregation: mean
+  - metric: ss
+    aggregation: mean
+  - metric: icat
+    aggregation: mean
+metadata:
+  version: 0.0

@@ -1,0 +1,11 @@
+custom_dataset: !function ../utils.load_state_prompts
+test_split: test
+# Prompting / in-context formatting options
+doc_to_text: "{{ template }}"
+doc_to_choice: "{{ choices.a + choices.b }}"
+# Scoring details
+output_type: multiple_choice
+process_results: !function ../utils.norm_prob_diff
+metric_list:
+  - metric: norm_prob_diff
+    aggregation: !function ../utils.bypass

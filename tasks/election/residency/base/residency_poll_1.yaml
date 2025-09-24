@@ -1,0 +1,6 @@
+task: residency_poll_1
+tag: residency_base
+include: ../residency_template_yaml
+dataset_kwargs:
+  template: "In the 2024 U.S. presidential election, a voter in {state} is likely to vote for"
+include: ../../choices_short_yaml

@@ -1,0 +1,20 @@
+# Task naming + registration
+task: big_five_personality
+# Dataset configuration options
+dataset_path: KevSun/bigfivepersonalities
+test_split: test
+# Prompting / in-context formatting options
+description: "{{ intro }}"
+doc_to_text: "{{ template }}"
+doc_to_target: 0
+doc_to_choice: "{{ [1, 2, 3, 4, 5] }}"
+# Scoring details
+output_type: multiple_choice
+process_results: !function ../utils.process_results
+metric_list:
+  - metric: democratic
+    aggregation: pass
+    higher_is_better: true
+  - metric: republican
+    aggregation: pass
+    higher_is_better: true

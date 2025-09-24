@@ -1,0 +1,21 @@
+group: stereo_set_intra_instruct
+task:
+  - stereo_set_intra_repl_it
+  - stereo_set_intra_comp_it
+  - stereo_set_intra_fill_it
+  - stereo_set_intra_miss_it
+aggregate_metric_list:
+  - metric: lms
+    aggregation: mean
+  - metric: ss
+    aggregation: mean
+  - metric: icat
+    aggregation: mean
+  - metric: p_stereo
+    aggregation: mean
+  - metric: p_antistereo
+    aggregation: mean
+  - metric: p_unrelated
+    aggregation: mean
+metadata:
+  version: 0.0

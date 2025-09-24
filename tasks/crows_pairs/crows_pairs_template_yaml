@@ -1,27 +1,20 @@
-task: crows_pairs_ll
 dataset_path: themis/data/builders/crows_pairs
-dataset_kwargs:
-  trust_remote_code: true
-test_split: test
+# dataset_path: /home/ch_karanikolopoulos/Desktop/themis-llm/themis/data/builders/crows_pairs
 output_type: multiple_choice
 doc_to_target: 0
-doc_to_choice: "{{choices}}"
-doc_to_text: "{{prompt}}"
-target_delimiter: ""
 process_results: !function utils.process_results
-process_docs: !function utils.process_docs
 metric_list:
-  - metric: likelihood1
+  - metric: pct_stereotype
     aggregation: mean
     higher_is_better: false
-  - metric: likelihood2
-    aggregation: mean
-    higher_is_better: true
   - metric: likelihood_diff
     aggregation: mean
     higher_is_better: false
-  - metric: is_stereo
+  - metric: likelihood_1
     aggregation: mean
     higher_is_better: false
+  - metric: likelihood_2
+    aggregation: mean
+    higher_is_better: true
 metadata:
-  version: 0.0
+  version: 1.2

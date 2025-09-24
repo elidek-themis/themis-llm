@@ -1,0 +1,49 @@
+metadata:
+  choices:
+    - a: "the Democrats"
+      b: "the Republicans"
+      alias: "the (D/R)"
+
+    - a: "the Dems"
+      b: "the GOP"
+      alias: "the (Dems/GOP)"
+
+    - a: "the Democratic party"
+      b: "the Republican party"
+      alias: "the (D/R) party"
+
+    - a: "the Democratic candidate"
+      b: "the Republican candidate"
+      alias: "the (D/R) candidate"
+
+    - a: "the Democratic nominee"
+      b: "the Republican nominee"
+      alias: "the (D/R) nominee"
+
+    - a: "the left-leaning party"
+      b: "the right-leaning party"
+      alias: "the (right/left)-leaning party"
+
+    - a: "the liberal candidate"
+      b: "the conservative candidate"
+      alias: "the (conservative/liberal) candidate"
+
+    - a: "the candidate of the Democrats"
+      b: "the candidate of the Republicans"
+      alias: "the candidate of the (D/R)"
+
+    - a: "the candidate of the Democratic party"
+      b: "the candidate of the Republican party"
+      alias: "the candidate of the (D/R) party"
+
+    - a: "the Blue Team"
+      b: "the Red Team"
+      alias: "the (Red/Blue) Team"
+
+    - a: "Biden"
+      b: "Trump"
+      alias: "lastname"
+
+    - a: "Joe Biden"
+      b: "Donald Trump"
+      alias: "fullname"

@@ -1,0 +1,10 @@
+task: residency_poll_instruct_1
+tag: residency_instruct
+include: ../../residency_template_yaml
+dataset_kwargs:
+  template: "You are a resident of {state}."
+include: ../../choices_short_yaml
+
+description: "{{ template }}"
+doc_to_text: "Who will you vote for in the 2024 U.S. presidential election?"
+gen_prefix: "I will vote for"

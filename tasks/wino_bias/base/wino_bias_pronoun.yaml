@@ -1,0 +1,3 @@
+include: ../wino_bias.yaml
+task: wino_bias_pronoun
+doc_to_text: "{{template}} The pronoun is"

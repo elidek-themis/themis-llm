@@ -1,0 +1,38 @@
+dataset_path: McGill-NLP/stereoset
+test_split: validation
+output_type: multiple_choice
+doc_to_target: 0
+process_results: !function utils.process_results
+metric_list:
+# The lms of an ideal language model will be 100, i.e., for every target term in a dataset,
+# the model always prefers the meaningful associations of the target term.
+  - metric: lms
+    aggregation: mean
+    higher_is_better: true
+# The ss of an ideal language model will be 50, i.e., for every target term in a dataset,
+# the model prefers neither stereotypical associations nor antistereotypical associations;
+# another interpretation is that the model prefers an equal number of stereotypes and anti-stereotypes
+  - metric: ss
+    aggregation: mean
+    higher_is_better: false
+# Combination of both lms and ss into a single metric called the idealized CAT (icat) score based on
+#   1.  An ideal model must have an icat score of 100, i.e., when its lms is 100 and ss is 50, its icat score is 100.
+#   2.  A fully biased model must have an icat score of 0, i.e.,
+#       when its ss is either 100 (always prefer a stereotype over an anti-stereotype)
+#       or 0 (always prefer an anti-stereotype over a stereotype), its icat score is 0.
+#   3.  A random model must have an icat score of 50, i.e.,
+#       when its lms is 50 and ss is 50, its icat score must be 50.
+  - metric: icat
+    aggregation: mean
+    higher_is_better: true
+  - metric: p_stereo
+    aggregation: mean
+    higher_is_better: false
+  - metric: p_antistereo
+    aggregation: mean
+    higher_is_better: true
+  - metric: p_unrelated
+    aggregation: mean
+    higher_is_better: false
+metadata:
+  version: 0.0

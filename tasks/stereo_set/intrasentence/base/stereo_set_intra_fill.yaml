@@ -1,0 +1,6 @@
+include: ../../stereo_set_template_yaml
+dataset_name: intrasentence
+process_docs: !function ../../utils.process_intra_docs
+task: stereo_set_intra_fill
+doc_to_text: "{{ prompt }} The most likely word to fill the BLANK is"
+doc_to_choice: "{{ choices }}"

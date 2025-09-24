@@ -1,0 +1,33 @@
+metadata:
+  choices:
+    - a: "the Democrats"
+      b: "the Republicans"
+      alias: "(Democrats/Republicans)"
+
+    - a: "the Democratic"
+      b: "the Republican"
+      alias: "(Democratic/Republican)"
+
+    - a: "the democratic"
+      b: "the republican"
+      alias: "(democratic/republican)"
+
+    - a: "the liberal"
+      b: "the conservative"
+      alias: "(liberal/conservative)"
+
+    - a: "the candidate of the Democratic"
+      b: "the candidate of the Republican"
+      alias: "candidate of the (D/R)"
+
+    - a: "the candidate of the democratic"
+      b: "the candidate of the republican"
+      alias: "candidate of the (d/r)"
+
+    - a: "Joe Biden"
+      b: "Donald Trump"
+      alias: "fullname"
+
+    - a: "Biden"
+      b: "Trump"
+      alias: "lastname"

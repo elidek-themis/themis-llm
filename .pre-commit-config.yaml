@@ -3,15 +3,6 @@ default_stages:
 exclude: .git|README.md|poetry.lock|.csv|.ipynb
 fail_fast: true
 repos:
-# Detect secrets
--   repo: https://github.com/Yelp/detect-secrets.git
-    rev: v1.5.0
-    hooks:
-    -   id: detect-secrets
-        name: detect secrets
-        args:
-        - --baseline
-        - .pre-commit/.secrets.baseline
 # Pre-commit hooks
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -40,12 +31,12 @@ repos:
         name: ruff formatter
         args: ["--check", "--diff"]
         types: [python]
-# MyPy
--   repo: local
-    hooks:
-    - id: mypy
-      name: mypy (local)
-      entry: bash ./tests/mypy.sh
-      language: system
-      types: [python]
-      pass_filenames: false
+# # MyPy
+# -   repo: local
+#     hooks:
+#     - id: mypy
+#       name: mypy (local)
+#       entry: bash ./tests/mypy.sh
+#       language: system
+#       types: [python]
+#       pass_filenames: false

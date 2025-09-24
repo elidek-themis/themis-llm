@@ -1,0 +1,4 @@
+include: ../wino_bias.yaml
+task: wino_bias_pronoun_it
+doc_to_text: "{{template}} What is the pronoun?"
+gen_prefix: The pronoun is

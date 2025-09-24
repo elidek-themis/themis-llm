@@ -1,0 +1,12 @@
+group: wino_bias_base
+task:
+  - wino_bias_pronoun
+  - wino_bias_miss
+  - wino_bias_blank
+aggregate_metric_list:
+  - metric: pct_stereotype
+    aggregation: mean
+  - metric: likelihood_diff
+    aggregation: mean
+metadata:
+  version: 0.0

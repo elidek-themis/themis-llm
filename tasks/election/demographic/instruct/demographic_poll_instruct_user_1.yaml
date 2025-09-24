@@ -1,0 +1,9 @@
+task: demographic_poll_instruct_user_1
+tag: demographic_instruct
+include: ../../demographic_template_yaml
+dataset_kwargs:
+  template: "You are {persona}. Always respond strictly as this person. Do not break character. Respond concisely and directly, without explanations or opinions."
+include: ../../choices_short_yaml
+
+doc_to_text: "{{ template}}\n\nWho will you vote for in the 2024 U.S. presidential election?"
+gen_prefix: "I will vote for"
