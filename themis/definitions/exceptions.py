@@ -1,2 +1,0 @@
-class ExperimentExists(Exception):
-    pass

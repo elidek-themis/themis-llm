@@ -7,6 +7,12 @@ from rich.panel import Panel
 from rich.pretty import Pretty
 
 
+class InterfaceConfig(BaseModel, frozen=True):
+    # TODO: make more specific
+    model: str
+    model_args: str | dict[str, Any]
+
+
 class GenerationArguments(BaseModel, frozen=True):
     temperature: float = Field(default=0.7, ge=0, le=1)
     top_p: float = Field(default=0.9, ge=0, le=1)
@@ -20,7 +26,10 @@ class GenerationArguments(BaseModel, frozen=True):
         return value
 
 
-class EvalArguments(BaseModel, frozen=True):
+class LMEvalArguments(BaseModel, validate_assignment=True):
+    model: str = Field(default="themis-singleton")
+    model_args: InterfaceConfig = Field()
+    tasks: str | list = Field()
     apply_chat_template: bool | None = Field(default=False)
     limit: float | int | None = Field(default=None)
     bootstrap_iters: int | None = Field(default=0, ge=0)
@@ -28,7 +37,14 @@ class EvalArguments(BaseModel, frozen=True):
     numpy_random_seed: int = Field(default=2025)
     torch_random_seed: int = Field(default=2025)
     fewshot_random_seed: int = Field(default=2025)
+    use_cache: str = Field()
     gen_kwargs: GenerationArguments | None = Field(default=None)
+
+    @field_validator("tasks")
+    def validate_tasks(cls, value: str | list) -> str | list:
+        if value == MISSING:
+            raise ValueError("Missing mandatory value: tasks")
+        return value
 
     @field_validator("apply_chat_template")
     def validate_template(cls, value: bool | None) -> bool:
@@ -43,45 +59,14 @@ class EvalArguments(BaseModel, frozen=True):
                 raise ValueError("If limit is a float, it must be between 0 and 1")
         return value
 
-
-class ExperimentConfig(BaseModel, validate_assignment=True):
-    name: str = Field(...)
-    model: str = Field(frozen=True)
-    task: str | list[str] = Field(...)
-    eval_kwargs: EvalArguments = Field(frozen=True, default_factory=EvalArguments)
-
-    @field_validator("task")
-    def validate_task(cls, value: str | list) -> str | list:
-        if value == MISSING:
-            raise ValueError("Missing mandatory value: task")
-        return value
-
-
-class InterfaceConfig(BaseModel, frozen=True):
-    name: str = Field(...)
-    args: dict[str, Any] = Field(default_factory=dict)
-
-
-class Config(BaseModel, frozen=True):
-    model: str = Field(..., repr=False)
-    seed: int = Field(..., repr=False)
-    interface: InterfaceConfig = Field(...)
-    experiment: ExperimentConfig = Field(...)
-
-    @field_validator("model")
-    def validate_model(cls, value: str) -> str:
-        if value == MISSING:
-            raise ValueError("Missing mandatory value: model")
-        return value
-
-    @field_validator("seed")
+    @field_validator("random_seed", "numpy_random_seed", "torch_random_seed", "fewshot_random_seed")
     def validate_seed(cls, value: int) -> int:
         if value == MISSING:
             raise ValueError("Missing mandatory value: seed")
         return value
 
 
-def table_print(config: Config, title: str = "Valid configuration :heavy_check_mark:") -> None:
+def table_print(config: BaseModel, title: str = "Valid configuration :heavy_check_mark:") -> None:
     """Prints the configuration in a rich panel.
 
     Args:

@@ -1,6 +1,6 @@
 [project]
 name = "themis-llm"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Themis"
 authors = [
   { name = "Christos Karanikolopoulos", email = "chkaranikolopoulos@cs.uoi.gr" },
@@ -19,7 +19,8 @@ dependencies = [
     "tinydb>=4.8.2",
     "huggingface-hub[cli]>=0.30.2,<0.31",
     "vllm>=0.8.3,<0.9",
-    "lm-eval>=0.4.8,<0.5"
+    "bitsandbytes>=0.45.5",
+    "lm-eval==0.4.9",
 ]
 
 [project.optional-dependencies]
@@ -32,15 +33,22 @@ dev = [
 viz = [
     "ipykernel>=6.29.5,<7",
     "ipywidgets>=8.1.5,<9",
-    "streamlit>=1.43.2,<2",
+    "streamlit==1.44.1",
     "streamlit-extras>=0.6.0,<0.7",
     "streamlit-code-editor>=0.1.22,<0.2",
     "st-pages>=1.0.1,<2",
     "matplotlib>=3.9.1,<4",
     "seaborn>=0.13.2,<0.14",
     "plotly>=6.0.1,<7",
-    "openpyxl>=3.1.5,<4", # UI table coloring
+    "openpyxl>=3.1.5,<4" # UI table coloring
 ]
+
+[project.scripts]
+themis = "themis.__main__:experiment_entry" # hydra entry
+themis-st = "themis_st.__main__:run_app" # streamlit entry
+
+[tool.hatch.version]
+path = "themis/definitions/version.py"
 
 [tool.hatch.build.targets.wheel]
 include = [
@@ -54,8 +62,9 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 viz = [
-    "relplot>=1.0",
+    "st-files-connection>=0.1.0",
 ]
+
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -113,4 +122,5 @@ exclude = [
     "themis/data/builders/",            # huggingface datasets
     "themis/definitions/registry.py",   # decorator functions
     "themis/core/controller.py",        # config composition
+    "themis_st/pages/"
 ]
