@@ -1,35 +1,59 @@
 [[pages]]
-path = "pages/themis.py"
+# path = "pages/themis.py"
 name = "Themis"
-icon = ""
-
-[[pages]]
-name = "Interface"
-icon = ""
+icon = "󠀠"
 is_section = true
 
 [[pages]]
-path = "pages/interface.py"
-name = "Setup"
-icon = ""
+path = "pages/datasets.py"
+name = "Dataset Explorer"
+icon = ":white_medium_small_square:"
 
 [[pages]]
 path = "pages/prompt.py"
 name = "Prompt Explorer"
-icon = ""
+icon = ":white_medium_small_square:"
 
 [[pages]]
-name = "LLM Election Polls"
-icon = ""
+name = "Experiments"
+icon = "󠀠"
 is_section = true
 
+[[pages]]
+path = "pages/experiments/crows_pairs.py"
+name = "CrowS-Pairs"
+icon = ":white_medium_small_square:"
+
 
 [[pages]]
-path = "pages/overview.py"
-name = "Overview"
-icon = ""
+path = "pages/experiments/stereo_set.py"
+name = "Stereo-Set"
+icon = ":white_medium_small_square:"
+
 
 [[pages]]
-path = "pages/summary.py"
-name = "Summary"
-icon = ""
+path = "pages/experiments/winogender.py"
+name = "Winogender"
+icon = ":white_medium_small_square:"
+
+[[pages]]
+path = "pages/experiments/wino_bias.py"
+name = "Winobias"
+icon = ":white_medium_small_square:"
+
+
+[[pages]]
+path = "pages/experiments/bbq.py"
+name = "BBQ"
+icon = ":white_medium_small_square:"
+
+
+# [[pages]]
+# path = "pages/residency.py"
+# name = "Residency"
+# icon = ""
+
+# [[pages]]
+# path = "pages/demographic.py"
+# name = "Demographic"
+# icon = ""
