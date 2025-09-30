@@ -2,7 +2,7 @@ data/logs
 data/experiments
 data/raw
 data/processed
-notebooks/
+notebooks/proto*
 
 .vscode
 .ruff_cache
