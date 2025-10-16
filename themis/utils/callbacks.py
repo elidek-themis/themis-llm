@@ -41,6 +41,7 @@ class MyCallback(Callback):
             # pop samples dict (task_name -> list of samples)
             samples_dict = results.pop("samples", None)
 
+            results["model_name"] = self.eval_config.metadata.get("model")
             # save main results
             with output_path.open("w", encoding="utf-8") as f:
                 json.dump(results, f, indent=2, ensure_ascii=False, default=str)

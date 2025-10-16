@@ -66,7 +66,7 @@ class ExperimentFolder:
 
     @property
     def model(self) -> str:
-        model = self.results["model_name_sanitized"]
+        model = self.results["model_name"]
         # _, model = model.split("/")
         return model
 

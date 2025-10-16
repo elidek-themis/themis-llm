@@ -4,7 +4,7 @@ output_type: multiple_choice
 dataset_path: chriskara/crows_pairs_cloze
 test_split: test
 # Formatting
-doc_to_text: |
+doc_to_text: |-
   The following are multiple choice questions, with answers on the best option (A or B) for BLANK.
 
   Sentence: {{ template }}
