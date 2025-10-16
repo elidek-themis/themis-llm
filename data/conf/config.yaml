@@ -1,11 +1,11 @@
 defaults:
-  - hydra: model_sweep
+  - hydra: stores
   - interface: hf
   - evaluation: lm_eval_cli
   - models: instruct
   - _self_
 
 model: ${models.${model_name}}
-tasks: wino_bias_instruct
+tasks: crows_pairs_completion_it_gen
 apply_chat_template: ${models.apply_chat_template}
 seed: 2025

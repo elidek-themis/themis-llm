@@ -1,3 +1,5 @@
 model: hf
 model_args:
   pretrained: ${oc.select:model, ???}
+  device_map: auto
+  dtype: ${oc.select:dtype, auto}

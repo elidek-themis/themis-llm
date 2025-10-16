@@ -1,7 +1,11 @@
+_target_: themis.definitions.config.LMEvalCLI
+_convert_: all
+
 # model, task
 model: ${interface.model}                                         # name of the model to evaluate, e.g., 'hf'
 tasks: ${tasks}                                                   # comma-separated list of task names or groupings, e.g. 'mmlu,hellaswag'
-model_args: ${to_string:${interface.model_args}}                  # model-specific args, e.g. {pretrained: EleutherAI/pythia-160m, dtype: float32}
+# model_args: ${to_string:${interface.model_args}}                  # model-specific args, e.g. {pretrained: EleutherAI/pythia-160m, dtype: float32}
+model_args: ${interface.model_args}                               # model-specific args, e.g. {pretrained: EleutherAI/pythia-160m, dtype: float32}
 
 # evaluation
 num_fewshot: null                                                 # no of few-shot examples to include in the context
@@ -45,8 +49,7 @@ check_integrity: false                                            # run test sui
 
 # metadata, seed
 metadata:
-  model: ${model}
-  tasks: ${tasks}
+  project: Themis
 seed:
   - ${seed} # python
   - ${seed} # numpy
