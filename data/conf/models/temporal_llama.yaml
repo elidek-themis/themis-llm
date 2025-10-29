@@ -1,0 +1,8 @@
+llama_2_7b: meta-llama/Llama-2-7b-chat-hf
+llama_3_8b: meta-llama/Meta-Llama-3-8B-Instruct
+llama_3_1_8b: meta-llama/Llama-3.1-8B-Instruct
+llama_3_2_3b: meta-llama/Llama-3.2-3B-Instruct
+
+all: ${models.llama_2_7b},${models.llama_3_8b},${models.llama_3_1_8b},${models.llama_3_2_3b}
+
+apply_chat_template: true
